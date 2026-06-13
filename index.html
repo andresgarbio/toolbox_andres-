@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GCA Python Reference</title>
+<style>
+  :root{
+    --ink:#10141b;
+    --surface:#1a212c;
+    --well:#0c1017;
+    --line:#283140;
+    --line-soft:#1f2733;
+    --text:#e7eef6;
+    --muted:#8d9aac;
+    --faint:#5d6877;
+    --accent:#54d6a4;
+    --accent-dim:#1d3a31;
+    --amber:#f2b463;
+    --amber-dim:#3a2f1a;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent); color:#06120d}
+
+  /* ---- header / hero search ---- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:linear-gradient(var(--ink) 70%, rgba(16,20,27,0));
+    padding:22px 20px 14px;
+  }
+  .bar{max-width:1180px; margin:0 auto}
+  .eyebrow{
+    display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+    font-family:var(--mono); font-size:11.5px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--faint); margin-bottom:12px;
+  }
+  .eyebrow b{color:var(--accent); font-weight:600; letter-spacing:.16em}
+  .eyebrow .count{margin-left:auto; color:var(--muted)}
+  .eyebrow .count b{color:var(--text); font-weight:600}
+
+  .search{
+    position:relative; display:flex; align-items:center;
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:0 14px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .search:focus-within{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-dim);
+  }
+  .search .glyph{font-family:var(--mono); color:var(--accent); font-size:18px; margin-right:10px}
+  .search input{
+    flex:1; background:none; border:0; outline:none; color:var(--text);
+    font-family:var(--mono); font-size:17px; padding:15px 0;
+  }
+  .search input::placeholder{color:var(--faint)}
+  .search .kbd{
+    font-family:var(--mono); font-size:12px; color:var(--muted);
+    border:1px solid var(--line); border-radius:6px; padding:2px 7px;
+    background:var(--well);
+  }
+
+  /* ---- category pills ---- */
+  .pills{
+    max-width:1180px; margin:12px auto 0; padding:0 20px;
+    display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .pill{
+    font-family:var(--mono); font-size:12px; letter-spacing:.04em;
+    color:var(--muted); background:var(--surface); border:1px solid var(--line);
+    border-radius:999px; padding:6px 13px; cursor:pointer;
+    transition:all .12s; white-space:nowrap;
+  }
+  .pill:hover{color:var(--text); border-color:var(--faint)}
+  .pill.on{background:var(--accent-dim); color:var(--accent); border-color:var(--accent)}
+
+  /* ---- grid ---- */
+  main{max-width:1180px; margin:0 auto; padding:18px 20px 80px}
+  .grid{
+    display:grid; gap:14px;
+    grid-template-columns:repeat(auto-fill, minmax(420px, 1fr));
+  }
+  .empty{
+    text-align:center; color:var(--muted); font-family:var(--mono);
+    padding:70px 20px; font-size:14px;
+  }
+  .empty b{color:var(--text)}
+
+  /* ---- card ---- */
+  .card{
+    background:var(--surface); border:1px solid var(--line-soft);
+    border-radius:12px; padding:16px 16px 14px; display:flex; flex-direction:column;
+  }
+  .card-top{display:flex; align-items:center; gap:10px; margin-bottom:9px}
+  .tag{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--accent); background:var(--accent-dim); border-radius:5px; padding:3px 8px;
+  }
+  .tag.gotcha{color:var(--amber); background:var(--amber-dim)}
+  .title{font-size:15.5px; font-weight:600; letter-spacing:-.01em}
+  mark{background:rgba(84,214,164,.28); color:inherit; border-radius:3px; padding:0 1px}
+
+  .trigger{
+    font-size:13px; color:var(--muted); margin:0 0 11px;
+    border-left:2px solid var(--line); padding-left:10px;
+  }
+  .trigger .lbl{
+    font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--faint); display:block; margin-bottom:2px;
+  }
+
+  .well{position:relative}
+  .well pre{
+    margin:0; background:var(--well); border:1px solid var(--line-soft);
+    border-radius:9px; padding:13px 14px; overflow-x:auto;
+  }
+  .well code{
+    font-family:var(--mono); font-size:12.5px; line-height:1.62; color:#cdd8e4;
+    white-space:pre; display:block;
+  }
+  .copy{
+    position:absolute; top:8px; right:8px;
+    font-family:var(--mono); font-size:11px; letter-spacing:.05em;
+    color:var(--muted); background:var(--surface); border:1px solid var(--line);
+    border-radius:6px; padding:5px 9px; cursor:pointer; transition:all .12s;
+    opacity:0;
+  }
+  .well:hover .copy, .copy:focus{opacity:1}
+  .copy:hover{color:var(--text); border-color:var(--faint)}
+  .copy.done{color:var(--accent); border-color:var(--accent); background:var(--accent-dim); opacity:1}
+
+  .note{
+    margin:11px 0 0; font-size:12.5px; color:var(--amber); line-height:1.5;
+    display:flex; gap:8px;
+  }
+  .note .lbl{
+    font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--amber); border:1px solid var(--amber-dim); border-radius:4px;
+    padding:2px 5px; height:fit-content; flex-shrink:0; margin-top:1px;
+  }
+  .note span{color:#d9c08e}
+
+  @media (max-width:560px){
+    .grid{grid-template-columns:1fr}
+    .search input{font-size:16px}
+    .copy{opacity:1}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="eyebrow">
+      <b>GCA // PY REF</b>
+      <span>type to filter &middot; click copy &middot; paste &amp; adapt</span>
+      <span class="count"><b id="n">0</b> snippets</span>
+    </div>
+    <label class="search">
+      <span class="glyph">&#8981;</span>
+      <input id="q" type="text" autocomplete="off" spellcheck="false"
+             placeholder="dijkstra, sliding window, cycle, unhashable...">
+      <span class="kbd">/</span>
+    </label>
+  </div>
+</header>
+<div class="pills" id="pills"></div>
+<main>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">
+    No match for <b id="eq"></b>. Try a pattern name or a keyword.
+  </div>
+</main>
+
+<script>
+const DATA = [
+/* ============ PATTERNS ============ */
+{cat:"Patterns", title:"Frequency count / group", trig:"count occurrences, most common, group anagrams, tally", code:
+`from collections import Counter, defaultdict
+c = Counter(arr)              # {val: count}
+c.most_common(2)              # [(val, count), ...] top 2
+c['x'] += 1                   # missing -> 0
+
+# group anagrams
+groups = defaultdict(list)
+for w in words:
+    groups[tuple(sorted(w))].append(w)
+list(groups.values())`},
+
+{cat:"Patterns", title:"Two pointers", trig:"sorted array, pair summing to target, in-place from both ends", code:
+`def two_sum_sorted(a, target):
+    i, j = 0, len(a) - 1
+    while i < j:
+        s = a[i] + a[j]
+        if s == target: return (i, j)
+        if s < target:  i += 1
+        else:           j -= 1
+    return None`},
+
+{cat:"Patterns", title:"Sliding window (variable)", trig:"longest/shortest subarray with condition, at most K distinct", code:
+`def longest_at_most_k(s, k):
+    from collections import defaultdict
+    count = defaultdict(int)
+    left = best = 0
+    for right, ch in enumerate(s):
+        count[ch] += 1
+        while len(count) > k:
+            count[s[left]] -= 1
+            if count[s[left]] == 0:
+                del count[s[left]]
+            left += 1
+        best = max(best, right - left + 1)
+    return best`},
+
+{cat:"Patterns", title:"Sliding window (fixed k)", trig:"window of size k, max sum of k consecutive", code:
+`def max_sum_k(a, k):
+    window = sum(a[:k])
+    best = window
+    for i in range(k, len(a)):
+        window += a[i] - a[i - k]
+        best = max(best, window)
+    return best`},
+
+{cat:"Patterns", title:"Binary search (bisect)", trig:"sorted, first/last position, insertion point, count of x", code:
+`import bisect
+i = bisect.bisect_left(a, x)   # first idx where a[i] >= x
+j = bisect.bisect_right(a, x)  # first idx where a[i] >  x
+count_of_x = j - i
+bisect.insort(a, x)            # insert, keep sorted`},
+
+{cat:"Patterns", title:"Binary search on answer", trig:"minimize the maximum, smallest speed/capacity that works, monotonic feasibility", code:
+`def min_feasible(lo, hi, feasible):
+    # feasible: False..False, True..True -> first True
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if feasible(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo`},
+
+{cat:"Patterns", title:"Prefix sums", trig:"range sum queries, subarray sum equals k", code:
+`from itertools import accumulate
+pre = [0] + list(accumulate(a))   # sum(a[l:r]) = pre[r]-pre[l]
+
+# count subarrays summing to k
+from collections import defaultdict
+seen = defaultdict(int); seen[0] = 1
+run = ans = 0
+for x in a:
+    run += x
+    ans += seen[run - k]
+    seen[run] += 1`},
+
+{cat:"Patterns", title:"Monotonic stack", trig:"next greater element, nearest smaller, largest rectangle", code:
+`def next_greater(a):
+    res = [-1] * len(a)
+    stack = []                  # indices, decreasing values
+    for i, x in enumerate(a):
+        while stack and a[stack[-1]] < x:
+            res[stack.pop()] = x
+        stack.append(i)
+    return res`},
+
+{cat:"Patterns", title:"Merge intervals", trig:"overlapping intervals, merge ranges, meeting rooms", code:
+`def merge(intervals):
+    intervals.sort()
+    out = []
+    for s, e in intervals:
+        if out and s <= out[-1][1]:
+            out[-1][1] = max(out[-1][1], e)
+        else:
+            out.append([s, e])
+    return out`},
+
+/* ============ GRAPHS ============ */
+{cat:"Graphs", title:"BFS on grid", trig:"shortest path unweighted, fewest steps, islands, flood fill", code:
+`from collections import deque
+def bfs(grid, start):
+    R, C = len(grid), len(grid[0])
+    q = deque([start]); seen = {start}; dist = 0
+    while q:
+        for _ in range(len(q)):
+            r, c = q.popleft()
+            for dr, dc in ((1,0),(-1,0),(0,1),(0,-1)):
+                nr, nc = r+dr, c+dc
+                if 0<=nr<R and 0<=nc<C and (nr,nc) not in seen and grid[nr][nc] != '#':
+                    seen.add((nr,nc)); q.append((nr,nc))
+        dist += 1
+    return seen`},
+
+{cat:"Graphs", title:"DFS (iterative)", trig:"explore all, connected component, traverse, backtracking base", code:
+`def dfs(graph, start):
+    seen, stack = set(), [start]
+    while stack:
+        node = stack.pop()
+        if node in seen: continue
+        seen.add(node)
+        for nxt in graph[node]:
+            if nxt not in seen:
+                stack.append(nxt)
+    return seen`},
+
+{cat:"Graphs", title:"Functional graph / cycle detection", trig:"each element points to one other, follow the chain, does it loop, two tables you alternate between", code:
+`def walk_until_repeat(nxt, start):
+    # nxt: list/dict mapping node -> next node
+    seen = set(); node = start; steps = 0
+    while node not in seen:
+        seen.add(node)
+        node = nxt[node]
+        steps += 1
+    return steps          # steps to first revisit`,
+note:"Namespace multi-table state as a tuple, e.g. node = (\"A\", i). Set members must be hashable."},
+
+{cat:"Graphs", title:"Dijkstra (heapq)", trig:"shortest path weighted, min cost, non-negative edges", code:
+`import heapq
+def dijkstra(graph, src):
+    # graph: {node: [(nbr, weight), ...]}
+    dist = {src: 0}; pq = [(0, src)]
+    while pq:
+        d, u = heapq.heappop(pq)
+        if d > dist.get(u, float('inf')): continue
+        for v, w in graph[u]:
+            nd = d + w
+            if nd < dist.get(v, float('inf')):
+                dist[v] = nd
+                heapq.heappush(pq, (nd, v))
+    return dist`},
+
+{cat:"Graphs", title:"Topological sort (Kahn)", trig:"dependencies, prerequisites, build order, DAG ordering, cycle in directed graph", code:
+`from collections import deque, defaultdict
+def topo_sort(n, edges):
+    # edges: (u, v) means u before v
+    graph = defaultdict(list); indeg = [0]*n
+    for u, v in edges:
+        graph[u].append(v); indeg[v] += 1
+    q = deque(i for i in range(n) if indeg[i] == 0)
+    order = []
+    while q:
+        u = q.popleft(); order.append(u)
+        for v in graph[u]:
+            indeg[v] -= 1
+            if indeg[v] == 0: q.append(v)
+    return order if len(order) == n else []   # [] = cycle`},
+
+{cat:"Graphs", title:"Union-Find (DSU)", trig:"connected components, same group?, redundant connection, Kruskal", code:
+`class DSU:
+    def __init__(self, n):
+        self.p = list(range(n)); self.r = [0]*n
+    def find(self, x):
+        while self.p[x] != x:
+            self.p[x] = self.p[self.p[x]]    # path compress
+            x = self.p[x]
+        return x
+    def union(self, a, b):
+        ra, rb = self.find(a), self.find(b)
+        if ra == rb: return False
+        if self.r[ra] < self.r[rb]: ra, rb = rb, ra
+        self.p[rb] = ra
+        if self.r[ra] == self.r[rb]: self.r[ra] += 1
+        return True`},
+
+/* ============ STRUCTURES ============ */
+{cat:"Structures", title:"Heap / priority queue", trig:"k largest/smallest, running median, merge k lists, always pop the min", code:
+`import heapq
+h = []
+heapq.heappush(h, x)
+smallest = heapq.heappop(h)
+heapq.heapify(lst)               # in-place, O(n)
+
+# max-heap: store negatives
+heapq.heappush(h, -x); top = -heapq.heappop(h)
+
+heapq.nlargest(k, arr)
+heapq.nsmallest(k, arr)`},
+
+{cat:"Structures", title:"LRU cache", trig:"cache with capacity, evict least recently used, memoize", code:
+`from functools import lru_cache
+@lru_cache(maxsize=None)
+def f(n): ...
+
+# hand-rolled with capacity
+from collections import OrderedDict
+class LRUCache:
+    def __init__(self, cap):
+        self.cap = cap; self.d = OrderedDict()
+    def get(self, key):
+        if key not in self.d: return -1
+        self.d.move_to_end(key)
+        return self.d[key]
+    def put(self, key, val):
+        if key in self.d: self.d.move_to_end(key)
+        self.d[key] = val
+        if len(self.d) > self.cap:
+            self.d.popitem(last=False)    # drop oldest`},
+
+{cat:"Structures", title:"Segment tree (sum)", trig:"range query AND point updates, prefix sum but values change", code:
+`class SegTree:
+    def __init__(self, data):
+        self.n = len(data)
+        self.t = [0] * (2*self.n)
+        for i in range(self.n):
+            self.t[self.n + i] = data[i]
+        for i in range(self.n-1, 0, -1):
+            self.t[i] = self.t[2*i] + self.t[2*i+1]
+    def update(self, i, val):
+        i += self.n; self.t[i] = val; i //= 2
+        while i:
+            self.t[i] = self.t[2*i] + self.t[2*i+1]; i //= 2
+    def query(self, l, r):       # sum on [l, r)
+        res = 0; l += self.n; r += self.n
+        while l < r:
+            if l & 1: res += self.t[l]; l += 1
+            if r & 1: r -= 1; res += self.t[r]
+            l //= 2; r //= 2
+        return res`,
+note:"Query range is half-open [l, r), 0-indexed. Iterative form is fastest to type without bugs."},
+
+{cat:"Structures", title:"Trie", trig:"prefix matching, autocomplete, word dictionary, starts-with", code:
+`class Trie:
+    def __init__(self):
+        self.root = {}
+    def insert(self, word):
+        node = self.root
+        for ch in word:
+            node = node.setdefault(ch, {})
+        node['$'] = True               # end marker
+    def search(self, word):
+        node = self.root
+        for ch in word:
+            if ch not in node: return False
+            node = node[ch]
+        return '$' in node
+    def starts_with(self, pre):
+        node = self.root
+        for ch in pre:
+            if ch not in node: return False
+            node = node[ch]
+        return True`},
+
+/* ============ DP ============ */
+{cat:"DP", title:"1D DP (house robber)", trig:"ways to reach, climbing stairs, max non-adjacent sum, decode", code:
+`def rob(nums):
+    prev = cur = 0
+    for x in nums:
+        prev, cur = cur, max(cur, prev + x)
+    return cur`},
+
+{cat:"DP", title:"2D DP (LCS)", trig:"edit distance, longest common subsequence, unique paths, min path sum", code:
+`def lcs(a, b):
+    m, n = len(a), len(b)
+    dp = [[0]*(n+1) for _ in range(m+1)]
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            if a[i-1] == b[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    return dp[m][n]`},
+
+{cat:"DP", title:"Memoized recursion", trig:"overlapping subproblems, try all + cache, coin change", code:
+`from functools import lru_cache
+def coin_change(coins, amount):
+    @lru_cache(maxsize=None)
+    def dp(rem):
+        if rem == 0: return 0
+        if rem < 0:  return float('inf')
+        return min((dp(rem - c) + 1 for c in coins),
+                   default=float('inf'))
+    ans = dp(amount)
+    return ans if ans != float('inf') else -1`},
+
+/* ============ STDLIB ============ */
+{cat:"Stdlib", title:"itertools", trig:"combinations, permutations, cartesian product, run-length, accumulate", code:
+`from itertools import accumulate, combinations, permutations, product, groupby
+list(accumulate([1,2,3]))           # [1, 3, 6]
+list(combinations([1,2,3], 2))      # all pairs
+list(permutations([1,2,3], 2))      # ordered pairs
+list(product([0,1], repeat=3))      # all binary triples
+[(k, len(list(g))) for k, g in groupby('aabbbc')]  # run lengths`},
+
+{cat:"Stdlib", title:"Sorting with keys", trig:"sort by multiple fields, custom comparator, sort by length", code:
+`arr.sort(key=lambda x: (x[1], -x[0]))   # 2nd asc, then 1st desc
+sorted(words, key=len)
+
+from functools import cmp_to_key
+arr.sort(key=cmp_to_key(lambda a, b: a - b))  # custom compare`},
+
+{cat:"Stdlib", title:"collections", trig:"default dict, deque both ends, fixed buffer, counter", code:
+`from collections import defaultdict, deque, Counter
+defaultdict(list)        # missing key -> []
+defaultdict(int)         # missing key -> 0
+dq = deque(maxlen=k)     # auto-evicting fixed window
+dq.appendleft(x); dq.popleft()        # O(1) both ends`},
+
+{cat:"Stdlib", title:"math / conversions", trig:"gcd lcm, integer sqrt, infinity, base conversion, char codes", code:
+`import math
+math.gcd(a, b); math.lcm(a, b)
+math.isqrt(n)            # exact integer sqrt, no float error
+math.inf                 # == float('inf')
+divmod(a, b)             # (a // b, a % b)
+ord('a'); chr(97)        # char <-> code point
+int('1010', 2)           # parse base-2 -> 10
+bin(10)[2:]              # '1010'`},
+
+/* ============ GOTCHAS ============ */
+{cat:"Gotchas", title:"Unhashable state", trig:"TypeError unhashable type list, set add fails, grid state as key", code:
+`seen.add([r, c])          # WRONG: list not hashable
+seen.add((r, c))          # tuple is hashable
+seen.add(frozenset(s))    # freeze a set
+key = tuple(map(tuple, grid))   # whole grid as a key
+key = ''.join(state)            # string state`},
+
+{cat:"Gotchas", title:"Recursion limit", trig:"RecursionError, deep DFS, large input recursion", code:
+`import sys
+sys.setrecursionlimit(10**6)   # before deep DFS / recursion`},
+
+{cat:"Gotchas", title:"Integer division & negatives", trig:"floor division surprise, modulo of negative, truncate toward zero", code:
+`-7 // 2       # -4   (floors toward -inf, NOT -3)
+-7 % 3        #  2   (result sign follows divisor)
+int(-7 / 2)   # -3   (truncates toward zero)
+abs(-7) // 2  #  3   (force magnitude first if needed)`},
+
+{cat:"Gotchas", title:"Mutable defaults & copying", trig:"shared default list, deep copy nested grid, copy rows", code:
+`def f(acc=[]): ...        # WRONG: shared across calls
+def f(acc=None):
+    if acc is None: acc = []
+
+grid2 = [row[:] for row in grid]    # copy each row
+import copy
+deep = copy.deepcopy(nested)        # fully independent`},
+
+{cat:"Gotchas", title:"Grid directions & bounds", trig:"4-directional, 8-directional neighbors, in-bounds check", code:
+`DIRS  = ((1,0), (-1,0), (0,1), (0,-1))          # 4-dir
+DIRS8 = [(dr,dc) for dr in (-1,0,1) for dc in (-1,0,1)
+         if (dr,dc) != (0,0)]                    # 8-dir
+if 0 <= nr < R and 0 <= nc < C:                  # in bounds
+    ...`},
+];
+
+/* ---------- render ---------- */
+const grid = document.getElementById('grid');
+const empty = document.getElementById('empty');
+const eq = document.getElementById('eq');
+const nEl = document.getElementById('n');
+const q = document.getElementById('q');
+const pillBox = document.getElementById('pills');
+
+let activeCat = "All";
+const cats = ["All", ...[...new Set(DATA.map(d => d.cat))]];
+
+cats.forEach(c => {
+  const b = document.createElement('button');
+  b.className = 'pill' + (c === "All" ? ' on' : '');
+  b.textContent = c === "All" ? "All" : c;
+  b.onclick = () => {
+    activeCat = c;
+    [...pillBox.children].forEach(p => p.classList.remove('on'));
+    b.classList.add('on');
+    render();
+  };
+  pillBox.appendChild(b);
+});
+
+function esc(s){
+  return s.replace(/[&<>]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]));
+}
+function hl(text, query){
+  const t = esc(text);
+  if(!query) return t;
+  const safe = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return t.replace(new RegExp('(' + safe + ')', 'ig'), '<mark>$1</mark>');
+}
+
+function render(){
+  const query = q.value.trim().toLowerCase();
+  grid.innerHTML = '';
+  let shown = 0;
+
+  DATA.forEach(d => {
+    if(activeCat !== "All" && d.cat !== activeCat) return;
+    const hay = (d.title + ' ' + d.trig + ' ' + d.cat + ' ' + d.code).toLowerCase();
+    if(query && !hay.includes(query)) return;
+    shown++;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const isGotcha = d.cat === "Gotchas";
+    card.innerHTML =
+      '<div class="card-top">' +
+        '<span class="tag' + (isGotcha ? ' gotcha' : '') + '">' + esc(d.cat) + '</span>' +
+        '<span class="title">' + hl(d.title, query) + '</span>' +
+      '</div>' +
+      '<p class="trigger"><span class="lbl">when you see</span>' + hl(d.trig, query) + '</p>' +
+      '<div class="well">' +
+        '<button class="copy">copy</button>' +
+        '<pre><code></code></pre>' +
+      '</div>' +
+      (d.note ? '<p class="note"><span class="lbl">note</span><span>' + esc(d.note) + '</span></p>' : '');
+
+    // set code via textContent so symbols never need escaping
+    card.querySelector('code').textContent = d.code;
+
+    const btn = card.querySelector('.copy');
+    btn.onclick = () => copy(d.code, btn);
+
+    grid.appendChild(card);
+  });
+
+  nEl.textContent = shown;
+  empty.style.display = shown ? 'none' : 'block';
+  eq.textContent = '"' + q.value.trim() + '"';
+}
+
+function copy(text, btn){
+  const done = () => {
+    btn.textContent = 'copied'; btn.classList.add('done');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('done'); }, 1300);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(() => fallback(text, done));
+  } else {
+    fallback(text, done);
+  }
+}
+function fallback(text, done){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); done(); } catch(e){}
+  document.body.removeChild(ta);
+}
+
+q.addEventListener('input', render);
+document.addEventListener('keydown', e => {
+  if(e.key === '/' && document.activeElement !== q){ e.preventDefault(); q.focus(); }
+  if(e.key === 'Escape'){ q.value = ''; q.blur(); render(); }
+});
+
+render();
+</script>
+</body>
+</html>
