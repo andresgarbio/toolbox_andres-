@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GCA Python Reference</title>
+<title>Python Dojo</title>
 <style>
   :root{
     --ink:#10141b;
@@ -43,6 +43,12 @@
     text-transform:uppercase; color:var(--faint); margin-bottom:12px;
   }
   .eyebrow b{color:var(--accent); font-weight:600; letter-spacing:.16em}
+  .eyebrow .home{
+    color:var(--muted); text-decoration:none; letter-spacing:.1em;
+    border:1px solid var(--line); border-radius:6px; padding:3px 9px;
+    transition:all .12s;
+  }
+  .eyebrow .home:hover{color:var(--text); border-color:var(--faint)}
   .eyebrow .count{margin-left:auto; color:var(--muted)}
   .eyebrow .count b{color:var(--text); font-weight:600}
 
@@ -160,7 +166,8 @@
 <header>
   <div class="bar">
     <div class="eyebrow">
-      <b>GCA // PY REF</b>
+      <a class="home" href="../">&larr; Toolbox</a>
+      <b>PYTHON DOJO</b>
       <span>type to filter &middot; click copy &middot; paste &amp; adapt</span>
       <span class="count"><b id="n">0</b> snippets</span>
     </div>

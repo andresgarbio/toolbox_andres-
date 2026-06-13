@@ -1,32 +1,32 @@
-# GCA Python Reference
+# Toolbox
 
-A single-page, paste-ready Python reference for timed coding assessments
-(CodeSignal GCA and similar). Built for speed of lookup under a running clock.
+A multi-language reference toolbox for looking up code fast under time
+pressure (CodeSignal GCA and similar). The landing page links to per-language
+"dojo" rooms; each room is a single self-contained page with live search and
+copy-ready snippets.
 
-## Use it
+## Structure
 
-Open the page, type a keyword in the search bar, and the cards filter live.
-Search the *symptom* of the problem ("each element points to one other",
-"shortest path weighted", "unhashable type"), not just the algorithm name.
-Every snippet has a copy button.
+    index.html          landing hub, links to each language room
+    python/index.html   Python Dojo (ready)
+
+Future rooms go in their own folders the same way, for example
+`cpp/index.html`, `sql/index.html`. Add a card for each in the `ROOMS` array
+near the bottom of the root `index.html`, set `status:"ready"` and an `href`
+when the room is live.
+
+## Using a room
+
+Type a keyword to filter the cards live. Search the *symptom* of the problem
+("each element points to one other", "shortest path weighted", "unhashable
+type"), not just the algorithm name. Every snippet has a copy button.
 
 - `/` focuses the search from anywhere
 - `Esc` clears the search
 
-## What's in it
-
-Medium patterns (two pointers, sliding windows, bisect, binary search on
-answer, prefix sums, monotonic stack, intervals, functional-graph cycle
-detection), graph algorithms (BFS, DFS, Dijkstra, Kahn topological sort,
-union-find), data structures (heapq, LRU cache, iterative segment tree,
-trie), DP templates, a stdlib cheat block, and common gotchas.
-
-All snippets use only the Python standard library. No pseudocode.
-
 ## Run locally
 
-It is one self-contained file with no dependencies. Open `index.html` in any
-browser, or serve it:
+Everything is dependency-free static HTML. Serve the repo root:
 
     python3 -m http.server 8000
 
@@ -34,5 +34,5 @@ then visit http://localhost:8000
 
 ## Host on GitHub Pages
 
-Push this repo, then in Settings > Pages set the source to your main branch
-root. The page goes live at https://USERNAME.github.io/REPO/
+Settings > Pages > Source = Deploy from a branch, `main` / root. The hub goes
+live at https://USERNAME.github.io/REPO/ and each room at /python/ and so on.
