@@ -1,0 +1,588 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0f1620; --panel:#161f2b; --panel2:#1d2937; --line:#2a3a4d;
+    --text:#c9d6e3; --muted:#7a8da0;
+    --signal:#f5a623; --warn:#ff5d5d; --pass:#34d6b4; --accent:#7aa2ff;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--text);font-family:var(--disp);
+    -webkit-font-smoothing:antialiased;line-height:1.5}
+  .wrap{max-width:980px;margin:0 auto;padding:20px 18px 64px}
+
+  .bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    border:1px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel));
+    border-radius:14px;padding:14px 18px;margin-bottom:14px}
+  .brand{display:flex;flex-direction:column;gap:2px;margin-right:auto}
+  .brand b{font-weight:700;letter-spacing:.04em;font-size:15px}
+  .brand span{font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase}
+  .swatch{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+  .clock{font-family:var(--mono);font-weight:600;font-size:34px;line-height:1;
+    letter-spacing:.04em;color:var(--pass);min-width:128px;text-align:center;transition:color .3s}
+  .clock.run{color:var(--signal);text-shadow:0 0 22px rgba(245,166,35,.22)}
+  .clock.over{color:var(--warn);text-shadow:0 0 22px rgba(255,93,93,.28)}
+  .tgt{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em}
+  .controls{display:flex;gap:8px}
+  button{font-family:var(--disp);cursor:pointer;border-radius:9px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--text);padding:8px 14px;font-size:13px;font-weight:500;
+    transition:transform .06s,border-color .15s,background .15s}
+  button:hover{border-color:#3c5168}
+  button:active{transform:translateY(1px)}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .btn-go{background:var(--signal);color:#1a1205;border-color:transparent;font-weight:600}
+  .btn-go:hover{background:#ffb73a}
+
+  .tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+  .tier{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:11px 12px;text-align:left}
+  .tier[aria-selected="true"]{border-color:var(--accent);background:var(--panel2)}
+  .tier .tname{font-size:13px;font-weight:600}
+  .tier .tmeta{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:3px}
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .chip{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:8px 12px;
+    display:flex;align-items:center;gap:8px;font-size:12.5px}
+  .chip[aria-selected="true"]{border-color:var(--signal);background:var(--panel2)}
+  .dot{width:8px;height:8px;border-radius:50%;background:#33485d;flex:none;transition:.2s}
+  .dot.pass{background:var(--pass);box-shadow:0 0 9px rgba(52,214,180,.6)}
+  .dot.fail{background:var(--warn);box-shadow:0 0 9px rgba(255,93,93,.6)}
+  .dot.attempt{background:var(--signal);box-shadow:0 0 9px rgba(245,166,35,.6)}
+
+  .panel{border:1px solid var(--line);background:var(--panel);border-radius:14px;overflow:hidden}
+  .phead{padding:18px 22px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .phead h2{margin:0 0 8px;font-size:19px;font-weight:600;letter-spacing:-.01em}
+  .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .badge{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.08em;
+    text-transform:uppercase;padding:3px 9px;border-radius:6px;border:1px solid}
+  .b-easy{color:var(--pass);border-color:rgba(52,214,180,.4);background:rgba(52,214,180,.08)}
+  .b-med{color:var(--signal);border-color:rgba(245,166,35,.4);background:rgba(245,166,35,.08)}
+  .b-hard{color:var(--warn);border-color:rgba(255,93,93,.4);background:rgba(255,93,93,.08)}
+  .meta .t{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+  .pbody{padding:20px 22px}
+  .pbody p{margin:0 0 12px}
+  .pbody h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:20px 0 8px;font-weight:600}
+  .pbody code{font-family:var(--mono);font-size:12.5px;background:var(--panel2);padding:1.5px 6px;border-radius:5px;border:1px solid var(--line)}
+  .pbody ul{margin:0 0 12px;padding-left:18px}
+  .pbody li{margin:4px 0}
+  .ex{font-family:var(--mono);font-size:12.5px;background:#0c121b;border:1px solid var(--line);
+    border-radius:9px;padding:12px 14px;margin:8px 0;white-space:pre-wrap;color:#aebccd}
+  .ex b{color:var(--accent);font-weight:500}
+
+  .edwrap{margin-top:8px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#0b1019}
+  .edbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .edbar span{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  textarea{width:100%;min-height:240px;resize:vertical;border:0;outline:0;background:#0b1019;color:#dbe7f3;
+    font-family:var(--mono);font-size:13px;line-height:1.65;padding:14px 16px;tab-size:4;white-space:pre;overflow-wrap:normal;overflow-x:auto}
+  .runrow{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
+  .status{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:auto}
+
+  .results{margin-top:14px;display:flex;flex-direction:column;gap:7px}
+  .case{border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-family:var(--mono);
+    font-size:12px;display:flex;gap:12px;align-items:flex-start;background:var(--panel)}
+  .case.ok{border-color:rgba(52,214,180,.35)}
+  .case.no{border-color:rgba(255,93,93,.35)}
+  .tag{font-weight:600;flex:none}
+  .tag.ok{color:var(--pass)} .tag.no{color:var(--warn)}
+  .case .detail{color:var(--muted);overflow-x:auto}
+  .case .detail b{color:var(--text);font-weight:500}
+  .summary{font-family:var(--mono);font-size:12.5px;padding:6px 0;font-weight:600}
+
+  .console{margin-top:14px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#0a0e15}
+  .conhead{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .conhead span{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+  .conhead .clr{font-size:11px;padding:3px 9px}
+  .conbody{font-family:var(--mono);font-size:12px;line-height:1.6;padding:12px 14px;white-space:pre-wrap;
+    word-break:break-word;max-height:280px;overflow:auto;color:#aebccd;min-height:36px}
+  .conbody .out{color:#cdd9e6}
+  .conbody .err{color:var(--warn)}
+  .conbody .sys{color:var(--muted)}
+  .conbody .res-ok{color:var(--pass)}
+  .conbody .res-no{color:var(--warn)}
+  .conbody .empty{color:var(--muted);font-style:italic}
+
+  details.sol,details.hint{margin-top:14px;border:1px solid var(--line);border-radius:11px;background:var(--panel2)}
+  details.hint{border-color:rgba(122,162,255,.35)}
+  details.sol summary,details.hint summary{cursor:pointer;padding:12px 16px;font-size:13px;font-weight:500;
+    list-style:none;display:flex;align-items:center;gap:8px;color:var(--muted)}
+  details.hint summary{color:var(--accent)}
+  details summary::-webkit-details-marker{display:none}
+  details.sol summary:hover{color:var(--text)}
+  details[open] summary{border-bottom:1px solid var(--line)}
+  details.sol[open] summary{color:var(--text)}
+  .solbody{padding:16px}
+  .solbody .ex{margin-top:0}
+  .solbody p{font-size:13px;color:var(--text);margin:0 0 10px}
+  .pyhint{font-family:var(--mono);font-size:11px;color:var(--muted);padding:0 22px 18px}
+  @media(max-width:680px){
+    .tiers{grid-template-columns:repeat(2,1fr)}
+    .clock{font-size:28px;min-width:110px}
+    .brand{order:-1;width:100%}
+  }
+</style>
+
+<div class="wrap">
+  <div class="bar">
+    <div class="brand">
+      <b>GCA TRAINING GYM</b>
+      <span>speed reps · 4 tiers · stopwatch counts up</span>
+    </div>
+    <div class="swatch">
+      <div class="clock" id="clock">00:00</div>
+      <div class="tgt" id="tgt">target —</div>
+    </div>
+    <div class="controls">
+      <button class="btn-go" id="startBtn">Start</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <div class="tiers" id="tiers"></div>
+  <div class="chips" id="chips"></div>
+
+  <div class="panel">
+    <div class="phead">
+      <h2 id="ptitle"></h2>
+      <div class="meta" id="pmeta"></div>
+    </div>
+    <div class="pbody" id="pbody"></div>
+    <div class="pyhint" id="pyhint">Initializing Python runtime…</div>
+  </div>
+</div>
+
+<script>
+const TIERS = [
+{
+  name:"Tier 1 · Speed", short:"Speed", target:300, targetLabel:"5:00", diff:"easy",
+  blurb:"One-shot writes. Plan in your head, type it once, run. Aim sub-5, then sub-3.",
+  problems:[
+    { name:"Even Sum", title:"Even Sum",
+      html:`<p>Given an integer array <code>a</code>, return the sum of its even elements.</p>
+        <div class="ex"><b>In:</b> [1,2,3,4]  <b>Out:</b> 6</div>`,
+      sig:"def solution(a):\n    ",
+      cases:[{args:[[1,2,3,4]],expected:6},{args:[[1,3,5]],expected:0},{args:[[2,4,6]],expected:12,hidden:true},{args:[[]],expected:0,hidden:true},{args:[[-2,-3,4]],expected:2,hidden:true}],
+      sol:"def solution(a):\n    return sum(x for x in a if x % 2 == 0)",
+      note:"A generator inside <code>sum</code>. The whole problem is one line — practice writing it without a scratch loop." },
+    { name:"Running Max", title:"Running Maximum",
+      html:`<p>Return an array where index <code>i</code> holds the maximum of <code>a[0..i]</code>.</p>
+        <div class="ex"><b>In:</b> [3,1,4,1,5]  <b>Out:</b> [3,3,4,4,5]</div>`,
+      sig:"def solution(a):\n    ",
+      cases:[{args:[[3,1,4,1,5]],expected:[3,3,4,4,5]},{args:[[5,4,3]],expected:[5,5,5]},{args:[[1]],expected:[1],hidden:true},{args:[[-1,-5,2]],expected:[-1,-1,2],hidden:true}],
+      sol:"def solution(a):\n    res, m = [], float('-inf')\n    for x in a:\n        m = max(m, x)\n        res.append(m)\n    return res",
+      note:"Carry a running value through one pass. This 'accumulate as you go' shape shows up constantly — make it reflexive." },
+    { name:"Vowel Count", title:"Vowel Count",
+      html:`<p>Return the number of vowels (<code>a e i o u</code>) in string <code>s</code>, case-insensitive.</p>
+        <div class="ex"><b>In:</b> "Programming"  <b>Out:</b> 3</div>`,
+      sig:"def solution(s):\n    ",
+      cases:[{args:["hello"],expected:2},{args:["XYZ"],expected:0},{args:["AEIOU"],expected:5,hidden:true},{args:[""],expected:0,hidden:true},{args:["Programming"],expected:3,hidden:true}],
+      sol:"def solution(s):\n    return sum(1 for c in s.lower() if c in 'aeiou')",
+      note:"<code>c in 'aeiou'</code> is the membership test you want; <code>.lower()</code> kills the case branch." },
+    { name:"First Unique", title:"First Unique Character",
+      html:`<p>Return the index of the first character in <code>s</code> that appears exactly once, or <code>-1</code> if none.</p>
+        <div class="ex"><b>In:</b> "aabbc"  <b>Out:</b> 4</div>`,
+      sig:"def solution(s):\n    ",
+      cases:[{args:["leetcode"],expected:0},{args:["aabb"],expected:-1},{args:["aabbc"],expected:4,hidden:true},{args:["z"],expected:0,hidden:true},{args:[""],expected:-1,hidden:true}],
+      sol:"def solution(s):\n    from collections import Counter\n    cnt = Counter(s)\n    for i, c in enumerate(s):\n        if cnt[c] == 1:\n            return i\n    return -1",
+      note:"Count first, then scan in order. The 'Counter then second pass' combo is worth having ready cold." },
+    { name:"Digit Sum", title:"Digit Sum",
+      html:`<p>Given a non-negative integer <code>n</code>, return the sum of its digits.</p>
+        <div class="ex"><b>In:</b> 505  <b>Out:</b> 10</div>`,
+      sig:"def solution(n):\n    ",
+      cases:[{args:[123],expected:6},{args:[0],expected:0},{args:[9999],expected:36,hidden:true},{args:[10],expected:1,hidden:true},{args:[505],expected:10,hidden:true}],
+      sol:"def solution(n):\n    return sum(int(d) for d in str(n))",
+      note:"Stringify to iterate digits — faster to write than the <code>% 10 / // 10</code> loop and just as correct here." },
+  ]
+},
+{
+  name:"Tier 2 · Sub-10", short:"Sub-10", target:600, targetLabel:"10:00", diff:"med",
+  blurb:"Harder than Tier 1, lighter than a real Task 2. The goal is pattern recognition: name the pattern in the first minute, then it's a 5-minute write.",
+  problems:[
+    { name:"Pair Sum Count", title:"Pair Sum Count",
+      html:`<p>Count index pairs <code>(i, j)</code> with <code>i &lt; j</code> and <code>a[i] + a[j] == target</code>.</p>
+        <div class="ex"><b>In:</b> a=[1,2,3,4], target=5  <b>Out:</b> 2</div>
+        <p style="color:var(--muted);font-size:12.5px">Pattern: complement counting with a running map.</p>`,
+      sig:"def solution(a, target):\n    ",
+      cases:[{args:[[1,2,3,4],5],expected:2},{args:[[1,1,1],2],expected:3},{args:[[5],5],expected:0,hidden:true},{args:[[2,2,2,2],4],expected:6,hidden:true},{args:[[0,0,0],0],expected:3,hidden:true}],
+      sol:"def solution(a, target):\n    from collections import Counter\n    seen = Counter()\n    cnt = 0\n    for x in a:\n        cnt += seen[target - x]   # how many earlier values complete x\n        seen[x] += 1\n    return cnt",
+      note:"Walk once. Before recording x, ask how many earlier numbers equal its complement. No nested loop, no double counting — each pair is counted when its second element arrives." },
+    { name:"Valid Parens", title:"Valid Parentheses",
+      html:`<p>Given a string of <code>()[]{}</code>, return <code>True</code> if every bracket is correctly opened and closed in order.</p>
+        <div class="ex"><b>In:</b> "([)]"  <b>Out:</b> False</div>
+        <p style="color:var(--muted);font-size:12.5px">Pattern: stack.</p>`,
+      sig:"def solution(s):\n    ",
+      cases:[{args:["()"],expected:true},{args:["()[]{}"],expected:true},{args:["(]"],expected:false},{args:["([)]"],expected:false,hidden:true},{args:["{[]}"],expected:true,hidden:true},{args:[""],expected:true,hidden:true}],
+      sol:"def solution(s):\n    stack = []\n    pair = {')': '(', ']': '[', '}': '{'}\n    for c in s:\n        if c in '([{':\n            stack.append(c)\n        elif c in pair:\n            if not stack or stack.pop() != pair[c]:\n                return False\n    return not stack",
+      note:"Push openers, and on a closer the top of the stack must be its match. End valid only if the stack is empty. The <code>closer -> opener</code> dict keeps the check to one line." },
+    { name:"Max Window Sum", title:"Max Sum of Window K",
+      html:`<p>Given array <code>a</code> and integer <code>k</code>, return the largest sum of any contiguous window of length <code>k</code>.</p>
+        <div class="ex"><b>In:</b> a=[2,1,5,1,3,2], k=3  <b>Out:</b> 9</div>
+        <p style="color:var(--muted);font-size:12.5px">Pattern: sliding window — add the entering element, drop the leaving one.</p>`,
+      sig:"def solution(a, k):\n    ",
+      cases:[{args:[[1,2,3,4,5],2],expected:9},{args:[[2,1,5,1,3,2],3],expected:9},{args:[[5],1],expected:5,hidden:true},{args:[[-1,-2,-3],2],expected:-3,hidden:true},{args:[[1,1,1,1],4],expected:4,hidden:true}],
+      sol:"def solution(a, k):\n    window = sum(a[:k])\n    best = window\n    for i in range(k, len(a)):\n        window += a[i] - a[i - k]   # slide: +new, -old\n        best = max(best, window)\n    return best",
+      note:"Seed the first window, then each step is one add and one subtract. Recomputing each window from scratch is the slow trap — the slide keeps it O(n)." },
+    { name:"Two Sum", title:"Two Sum (indices)",
+      html:`<p>Return the indices <code>[i, j]</code> (<code>i &lt; j</code>) of the two values that add to <code>target</code>. Exactly one solution exists.</p>
+        <div class="ex"><b>In:</b> a=[2,7,11,15], target=9  <b>Out:</b> [0,1]</div>`,
+      sig:"def solution(a, target):\n    ",
+      cases:[{args:[[2,7,11,15],9],expected:[0,1]},{args:[[3,2,4],6],expected:[1,2]},{args:[[3,3],6],expected:[0,1],hidden:true},{args:[[1,5,3,7],10],expected:[2,3],hidden:true}],
+      sol:"def solution(a, target):\n    pos = {}\n    for i, x in enumerate(a):\n        if target - x in pos:\n            return [pos[target - x], i]\n        pos[x] = i\n    return []",
+      note:"Check for the complement before inserting the current value — that ordering guarantees the earlier index comes first and you never pair a value with itself." },
+    { name:"Most Frequent", title:"Most Frequent (tie → smallest)",
+      html:`<p>Return the element that appears most often. If several tie, return the smallest of them.</p>
+        <div class="ex"><b>In:</b> [1,2,2,3,3]  <b>Out:</b> 2</div>
+        <p style="color:var(--muted);font-size:12.5px">Pattern: count, then a custom sort key.</p>`,
+      sig:"def solution(a):\n    ",
+      cases:[{args:[[1,2,2,3,3]],expected:2},{args:[[4,4,4,1]],expected:4},{args:[[7]],expected:7,hidden:true},{args:[[5,5,3,3,3]],expected:3,hidden:true},{args:[[1,1,2,2]],expected:1,hidden:true}],
+      sol:"def solution(a):\n    from collections import Counter\n    c = Counter(a)\n    return min(c, key=lambda x: (-c[x], x))",
+      note:"The key <code>(-count, value)</code> sorts by most-frequent first, then smallest value. Negating the count lets a single <code>min</code> do both tie-break rules at once." },
+  ]
+},
+{
+  name:"Tier 3 · Simulation", short:"Simulation", target:1200, targetLabel:"20:00", diff:"med",
+  blurb:"Read carefully, model the state, write small helpers fast. No clever algorithm — the difficulty is bookkeeping and edge cases. Drill the speed of getting state + loop scaffolded.",
+  problems:[
+    { name:"Inventory", title:"Inventory Operations",
+      html:`<p>Process a list of operations on a warehouse. Each op is a list:</p>
+        <ul>
+          <li><code>["ADD", item, qty]</code> — add <code>qty</code> of <code>item</code>.</li>
+          <li><code>["REMOVE", item, qty]</code> — remove up to <code>qty</code>; never drop below 0.</li>
+          <li><code>["QUERY", item]</code> — record the current quantity of <code>item</code>.</li>
+        </ul>
+        <p>Items start at 0. Return the list of QUERY results, in order.</p>
+        <div class="ex"><b>In:</b> [["ADD","apple",5],["QUERY","apple"],["REMOVE","apple",2],["QUERY","apple"]]
+<b>Out:</b> [5, 3]</div>`,
+      sig:'def solution(ops):\n    ',
+      cases:[
+        {args:[[["ADD","apple",5],["QUERY","apple"],["REMOVE","apple",2],["QUERY","apple"]]],expected:[5,3]},
+        {args:[[["QUERY","x"]]],expected:[0]},
+        {args:[[["ADD","a",3],["REMOVE","a",10],["QUERY","a"]]],expected:[0],hidden:true},
+        {args:[[["ADD","a",1],["ADD","a",2],["QUERY","a"],["QUERY","b"]]],expected:[3,0],hidden:true},
+      ],
+      sol:'def solution(ops):\n    inv = {}\n    out = []\n    for op in ops:\n        t = op[0]\n        if t == "ADD":\n            inv[op[1]] = inv.get(op[1], 0) + op[2]\n        elif t == "REMOVE":\n            inv[op[1]] = max(0, inv.get(op[1], 0) - op[2])\n        elif t == "QUERY":\n            out.append(inv.get(op[1], 0))\n    return out',
+      note:"<code>dict.get(item, 0)</code> handles the 'never seen' case in one move, and <code>max(0, ...)</code> enforces the floor. The whole task is a dispatch over op types — get that branch skeleton down fast." },
+    { name:"Bank", title:"Bank Transactions",
+      html:`<p>Accounts are numbered <code>1..n</code> and start at balance 0. Process queries:</p>
+        <ul>
+          <li><code>["DEPOSIT", acc, amt]</code></li>
+          <li><code>["WITHDRAW", acc, amt]</code> — only if the balance covers it; otherwise ignore.</li>
+          <li><code>["TRANSFER", src, dst, amt]</code> — only if <code>src</code> covers it; otherwise ignore.</li>
+          <li><code>["BALANCE", acc]</code> — record the current balance.</li>
+        </ul>
+        <p>Return the list of recorded balances.</p>
+        <div class="ex"><b>In:</b> n=2, [["DEPOSIT",1,100],["TRANSFER",1,2,30],["BALANCE",1],["BALANCE",2]]
+<b>Out:</b> [70, 30]</div>`,
+      sig:'def solution(n, queries):\n    ',
+      cases:[
+        {args:[2,[["DEPOSIT",1,100],["TRANSFER",1,2,30],["BALANCE",1],["BALANCE",2]]],expected:[70,30]},
+        {args:[1,[["WITHDRAW",1,50],["BALANCE",1]]],expected:[0]},
+        {args:[2,[["DEPOSIT",1,50],["WITHDRAW",1,60],["BALANCE",1]]],expected:[50],hidden:true},
+        {args:[3,[["DEPOSIT",3,10],["TRANSFER",3,1,20],["BALANCE",3],["BALANCE",1]]],expected:[10,0],hidden:true},
+      ],
+      sol:'def solution(n, queries):\n    bal = [0] * (n + 1)   # 1-indexed\n    out = []\n    for q in queries:\n        t = q[0]\n        if t == "DEPOSIT":\n            bal[q[1]] += q[2]\n        elif t == "WITHDRAW":\n            if bal[q[1]] >= q[2]:\n                bal[q[1]] -= q[2]\n        elif t == "TRANSFER":\n            s, d, amt = q[1], q[2], q[3]\n            if bal[s] >= amt:\n                bal[s] -= amt\n                bal[d] += amt\n        elif t == "BALANCE":\n            out.append(bal[q[1]])\n    return out',
+      note:"Size the array <code>n+1</code> so account numbers index directly. The 'only if it covers it, else silently ignore' rule is the classic place to lose a hidden case — read it twice." },
+    { name:"Spiral", title:"Spiral Matrix Order",
+      html:`<p>Return all elements of a 2D matrix in clockwise spiral order, starting top-left.</p>
+        <div class="ex"><b>In:</b> [[1,2,3],[4,5,6],[7,8,9]]
+<b>Out:</b> [1,2,3,6,9,8,7,4,5]</div>`,
+      sig:'def solution(matrix):\n    ',
+      cases:[
+        {args:[[[1,2,3],[4,5,6],[7,8,9]]],expected:[1,2,3,6,9,8,7,4,5]},
+        {args:[[[1,2],[3,4]]],expected:[1,2,4,3]},
+        {args:[[[1]]],expected:[1],hidden:true},
+        {args:[[[1,2,3,4]]],expected:[1,2,3,4],hidden:true},
+        {args:[[[1],[2],[3]]],expected:[1,2,3],hidden:true},
+      ],
+      sol:'def solution(matrix):\n    if not matrix or not matrix[0]:\n        return []\n    res = []\n    top, bottom = 0, len(matrix) - 1\n    left, right = 0, len(matrix[0]) - 1\n    while top <= bottom and left <= right:\n        for j in range(left, right + 1):\n            res.append(matrix[top][j])\n        top += 1\n        for i in range(top, bottom + 1):\n            res.append(matrix[i][right])\n        right -= 1\n        if top <= bottom:\n            for j in range(right, left - 1, -1):\n                res.append(matrix[bottom][j])\n            bottom -= 1\n        if left <= right:\n            for i in range(bottom, top - 1, -1):\n                res.append(matrix[i][left])\n            left += 1\n    return res',
+      note:"Four boundaries that close inward. The two <code>if</code> guards before the bottom row and left column are what stop single-row / single-column inputs from being walked twice — that's the edge case graders love here." },
+  ]
+},
+{
+  name:"Tier 4 · Algorithmic", short:"Algorithmic", target:2400, targetLabel:"40:00", diff:"hard",
+  blurb:"These decompose into 3-4 helpers. Use the hint button to grab the pattern skeleton, then fill it in. Goal: make the skeleton automatic so you spend the time on the problem-specific part, not on remembering the shape.",
+  problems:[
+    { name:"Course Order", title:"Course Order (topological sort)",
+      html:`<p>There are <code>n</code> courses labeled <code>0..n-1</code>. Each prerequisite <code>[a, b]</code> means course <code>b</code> must be taken before course <code>a</code>. Return a valid order to take all courses. If multiple valid orders exist, return the <b>lexicographically smallest</b>. If it's impossible (a cycle), return <code>[]</code>.</p>
+        <div class="ex"><b>In:</b> n=4, prerequisites=[[1,0],[2,0],[3,1],[3,2]]
+<b>Out:</b> [0,1,2,3]</div>`,
+      sig:'def solution(n, prerequisites):\n    ',
+      cases:[
+        {args:[2,[[1,0]]],expected:[0,1]},
+        {args:[4,[[1,0],[2,0],[3,1],[3,2]]],expected:[0,1,2,3]},
+        {args:[2,[[0,1],[1,0]]],expected:[]},
+        {args:[3,[]],expected:[0,1,2],hidden:true},
+        {args:[3,[[2,0],[2,1]]],expected:[0,1,2],hidden:true},
+      ],
+      hint:`# Kahn's algorithm — topological sort by repeatedly taking a node with no
+# remaining prerequisites. Decompose:
+
+def build_graph(n, prerequisites):
+    adj = [[] for _ in range(n)]
+    indeg = [0] * n
+    for a, b in prerequisites:        # b must come before a:  b -> a
+        adj[b].append(a)
+        indeg[a] += 1
+    return adj, indeg
+
+# main loop:
+#   1. adj, indeg = build_graph(...)
+#   2. push every node with indeg == 0 into a MIN-HEAP
+#        (a heap, not a plain queue -> guarantees lexicographically smallest)
+#   3. while heap: pop smallest u, append to order,
+#        for each neighbor v in adj[u]: indeg[v] -= 1; if 0 -> push v
+#   4. return order if len(order) == n else []   # short order => a cycle`,
+      sol:'def solution(n, prerequisites):\n    import heapq\n    adj = [[] for _ in range(n)]\n    indeg = [0] * n\n    for a, b in prerequisites:      # b before a\n        adj[b].append(a)\n        indeg[a] += 1\n\n    heap = [i for i in range(n) if indeg[i] == 0]\n    heapq.heapify(heap)\n    order = []\n    while heap:\n        u = heapq.heappop(heap)\n        order.append(u)\n        for v in adj[u]:\n            indeg[v] -= 1\n            if indeg[v] == 0:\n                heapq.heappush(heap, v)\n    return order if len(order) == n else []',
+      note:"Indegree = how many prerequisites a course still has. Start from the zero-indegree nodes, and each time you 'take' a course, its dependents lose one prerequisite. Using a min-heap instead of a plain queue gives the lexicographically smallest order for free. If you can't place all n, a cycle blocked some — return []. O((n + e) log n)." },
+    { name:"LRU Cache", title:"LRU Cache (operations)",
+      html:`<p>Simulate an LRU cache of size <code>capacity</code> over a list of operations:</p>
+        <ul>
+          <li><code>["PUT", key, value]</code> — insert/update; counts as a use. If over capacity, evict the least-recently-used key.</li>
+          <li><code>["GET", key]</code> — return the value (or <code>-1</code> if absent); a hit counts as a use.</li>
+        </ul>
+        <p>Return the list of GET results, in order.</p>
+        <div class="ex"><b>In:</b> capacity=2,
+  [["PUT",1,1],["PUT",2,2],["GET",1],["PUT",3,3],["GET",2],["GET",3]]
+<b>Out:</b> [1, -1, 3]</div>`,
+      sig:'def solution(capacity, operations):\n    ',
+      cases:[
+        {args:[2,[["PUT",1,1],["PUT",2,2],["GET",1],["PUT",3,3],["GET",2],["GET",3]]],expected:[1,-1,3]},
+        {args:[1,[["PUT",1,1],["PUT",2,2],["GET",1],["GET",2]]],expected:[-1,2]},
+        {args:[2,[["GET",5]]],expected:[-1],hidden:true},
+        {args:[2,[["PUT",1,10],["PUT",1,20],["GET",1]]],expected:[20],hidden:true},
+      ],
+      hint:`# Two clean ways. Pick ONE.
+
+# A) OrderedDict — least code, perfect for a timed task:
+#    - on GET hit or PUT of an existing key:  cache.move_to_end(key)   # mark most-recent
+#    - on PUT:  cache[key] = value
+#             if len(cache) > capacity:  cache.popitem(last=False)     # drop the LRU end
+
+# B) dict + doubly linked list (what a live interviewer wants to see). Helpers:
+def _remove(node):          # unlink node from the list
+    node.prev.next = node.next
+    node.next.prev = node.prev
+
+def _add_front(node):       # insert just after the head sentinel = most-recent
+    node.next = head.next
+    node.prev = head
+    head.next.prev = node
+    head.next = node
+
+# get(key):  miss -> -1 ; hit -> _remove(node); _add_front(node); return node.val
+# put(key,v): if key exists -> _remove(old); make node; _add_front; map[key]=node
+#             if len(map) > capacity -> drop the node before the tail sentinel`,
+      sol:'def solution(capacity, operations):\n    from collections import OrderedDict\n    cache = OrderedDict()\n    out = []\n    for op in operations:\n        if op[0] == "GET":\n            k = op[1]\n            if k in cache:\n                cache.move_to_end(k)\n                out.append(cache[k])\n            else:\n                out.append(-1)\n        else:                       # PUT\n            k, v = op[1], op[2]\n            if k in cache:\n                cache.move_to_end(k)\n            cache[k] = v\n            if len(cache) > capacity:\n                cache.popitem(last=False)\n    return out',
+      note:"<code>OrderedDict</code> keeps insertion order and lets you reorder in O(1): <code>move_to_end</code> marks a key most-recently-used, <code>popitem(last=False)</code> drops the least-recent. That replaces a hand-built doubly linked list. Know the linked-list version too for a verbal interview, but for a timed coding task this is the fast, correct path." },
+  ]
+},
+];
+
+// flatten index helpers
+const state = { tier:0, prob:0, code:{}, status:{}, elapsed:0, running:false, timer:null };
+TIERS.forEach((T,ti)=>T.problems.forEach((p,pi)=>{ const id=ti+'-'+pi; state.code[id]=p.sig; state.status[id]='none'; }));
+function curId(){ return state.tier+'-'+state.prob; }
+function curProb(){ return TIERS[state.tier].problems[state.prob]; }
+function curTarget(){ return TIERS[state.tier].target; }
+
+const clock=document.getElementById('clock'), tgt=document.getElementById('tgt'), pyhint=document.getElementById('pyhint');
+function fmt(s){const m=Math.floor(s/60),x=s%60;return String(m).padStart(2,'0')+':'+String(x).padStart(2,'0');}
+function paintClock(){
+  clock.textContent=fmt(state.elapsed);
+  clock.classList.toggle('run', state.running && state.elapsed<curTarget());
+  clock.classList.toggle('over', state.elapsed>=curTarget());
+  tgt.textContent='target '+TIERS[state.tier].targetLabel;
+}
+function tick(){ state.elapsed++; paintClock(); }
+document.getElementById('startBtn').onclick=function(){
+  if(state.running){clearInterval(state.timer);state.running=false;this.textContent='Resume';}
+  else{state.timer=setInterval(tick,1000);state.running=true;this.textContent='Pause';}
+  paintClock();
+};
+document.getElementById('resetBtn').onclick=function(){
+  clearInterval(state.timer);state.running=false;state.elapsed=0;
+  document.getElementById('startBtn').textContent='Start';paintClock();
+};
+function resetClock(){
+  clearInterval(state.timer);state.running=false;state.elapsed=0;
+  document.getElementById('startBtn').textContent='Start';paintClock();
+}
+
+function renderTiers(){
+  const el=document.getElementById('tiers');el.innerHTML='';
+  TIERS.forEach((T,ti)=>{
+    const b=document.createElement('button');
+    b.className='tier';b.setAttribute('aria-selected',ti===state.tier);
+    b.innerHTML=`<div class="tname">${T.short}</div><div class="tmeta">${T.problems.length} probs · ${T.targetLabel}</div>`;
+    b.onclick=()=>{saveCode();state.tier=ti;state.prob=0;resetClock();renderTiers();renderChips();renderPanel();};
+    el.appendChild(b);
+  });
+}
+function renderChips(){
+  const el=document.getElementById('chips');el.innerHTML='';
+  TIERS[state.tier].problems.forEach((p,pi)=>{
+    const id=state.tier+'-'+pi;
+    const c=document.createElement('button');
+    c.className='chip';c.setAttribute('aria-selected',pi===state.prob);
+    c.innerHTML=`<span class="dot ${state.status[id]==='pass'?'pass':state.status[id]==='fail'?'fail':state.status[id]==='attempt'?'attempt':''}"></span>${p.name}`;
+    c.onclick=()=>{saveCode();state.prob=pi;resetClock();renderChips();renderPanel();};
+    el.appendChild(c);
+  });
+}
+
+const badgeClass={easy:'b-easy',med:'b-med',hard:'b-hard'};
+const badgeText={easy:'Easy',med:'Medium',hard:'Hard'};
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function saveCode(){const ta=document.getElementById('editor');if(ta)state.code[curId()]=ta.value;}
+
+function renderPanel(){
+  const T=TIERS[state.tier], p=curProb(), id=curId();
+  document.getElementById('ptitle').textContent=p.title;
+  document.getElementById('pmeta').innerHTML=
+    `<span class="badge ${badgeClass[T.diff]}">${badgeText[T.diff]}</span>
+     <span class="t">${T.short} · target ${T.targetLabel}</span>
+     <span class="t">·</span><span class="t"><code style="font-family:var(--mono)">solution(...)</code></span>`;
+
+  const hintBlock = p.hint ? `
+    <details class="hint" id="hintBox">
+      <summary>Show pattern hint (helper-function skeleton)</summary>
+      <div class="solbody"><div class="ex">${escapeHtml(p.hint)}</div></div>
+    </details>` : '';
+
+  document.getElementById('pbody').innerHTML = `
+    <p style="color:var(--muted);font-size:12.5px;margin-top:-4px">${T.blurb}</p>
+    ${p.html}
+    <h3>Your Solution</h3>
+    <div class="edwrap">
+      <div class="edbar"><span>solution.py</span><span>Tab inserts 4 spaces</span></div>
+      <textarea id="editor" spellcheck="false"></textarea>
+    </div>
+    <div class="runrow">
+      <button class="btn-go" id="runBtn">Run Tests</button>
+      <button id="resetCodeBtn">Reset code</button>
+      <span class="status" id="runStatus"></span>
+    </div>
+    <div class="results" id="results"></div>
+    <div class="console" id="console">
+      <div class="conhead"><span>CONSOLE — stdout / test output</span><button class="clr" id="clrBtn">Clear</button></div>
+      <div class="conbody" id="conbody"><span class="empty">Run tests to see print() output and per-case results here.</span></div>
+    </div>
+    ${hintBlock}
+    <details class="sol" id="solBox">
+      <summary id="solSummary">Reveal reference solution</summary>
+      <div class="solbody"><p>${p.note}</p><div class="ex">${escapeHtml(p.sol)}</div></div>
+    </details>`;
+
+  const ta=document.getElementById('editor');
+  ta.value=state.code[id];
+  ta.addEventListener('keydown',e=>{
+    if(e.key==='Tab'){e.preventDefault();const s=ta.selectionStart,en=ta.selectionEnd;
+      ta.value=ta.value.slice(0,s)+'    '+ta.value.slice(en);ta.selectionStart=ta.selectionEnd=s+4;}
+  });
+  document.getElementById('runBtn').onclick=()=>runTests();
+  document.getElementById('resetCodeBtn').onclick=()=>{ta.value=p.sig;state.code[id]=p.sig;};
+  document.getElementById('clrBtn').onclick=()=>{document.getElementById('conbody').innerHTML='<span class="empty">Console cleared.</span>';};
+  const solBox=document.getElementById('solBox');
+  solBox.querySelector('summary').addEventListener('click',ev=>{
+    if(!solBox.open && !solBox.dataset.ok){ev.preventDefault();
+      if(confirm("Reveal the full reference solution? Try the hint and your own attempt first.")){
+        solBox.dataset.ok="1";solBox.open=true;solBox.querySelector('summary').textContent="Reference solution";}
+    }
+  });
+}
+
+// ---- Pyodide ----
+let pyodide=null, pyState='loading';
+(function loadPy(){
+  const s=document.createElement('script');
+  s.src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js";
+  s.onload=async()=>{
+    try{pyodide=await loadPyodide({indexURL:"https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"});
+      pyState='ready';pyhint.textContent="Python runtime ready — write your solution and Run Tests.";}
+    catch(e){pyState='fail';pyhint.textContent="Python runtime failed to load. Tasks and solutions still work — run code in your own IDE against the listed cases.";}
+  };
+  s.onerror=()=>{pyState='fail';pyhint.textContent="Couldn't reach the Python runtime (network blocked). Tasks and solutions still work — run code locally.";};
+  document.head.appendChild(s);
+})();
+
+async function runTests(){
+  const status=document.getElementById('runStatus'), results=document.getElementById('results'), conbody=document.getElementById('conbody');
+  saveCode();
+  if(pyState==='loading'){status.textContent="runtime still loading…";return;}
+  if(pyState==='fail'){status.textContent="runtime unavailable — run locally";return;}
+  status.textContent="running…";results.innerHTML='';conbody.innerHTML='<span class="sys">running…</span>';
+  const p=curProb(), id=curId(), code=state.code[id];
+  const casesJson=JSON.stringify(p.cases.map(c=>({args:c.args,expected:c.expected})));
+  const harness=[
+    code,
+    "import json as _json",
+    "_cases=_json.loads(_CASES_JSON)",
+    "_out=[]",
+    "for _i,_c in enumerate(_cases):",
+    "    print('\\x01C'+str(_i))",
+    "    try:",
+    "        _r=solution(*_c['args'])",
+    "        _out.append({'ok':_r==_c['expected'],'got':repr(_r),'exp':repr(_c['expected'])})",
+    "    except Exception as _e:",
+    "        _out.append({'ok':False,'got':'ERROR: '+str(_e),'exp':repr(_c['expected'])})",
+    "_json.dumps(_out)"
+  ].join("\n");
+  const buf=[];
+  try{
+    pyodide.setStdout({batched:s=>buf.push({k:'out',s})});
+    pyodide.setStderr({batched:s=>buf.push({k:'err',s})});
+    pyodide.globals.set("_CASES_JSON",casesJson);
+    const raw=await pyodide.runPythonAsync(harness);
+    const out=JSON.parse(raw);
+    let passed=0;
+    out.forEach((o,i)=>{
+      if(o.ok)passed++;
+      const c=p.cases[i];
+      const label=c.hidden?`Hidden #${i+1}`:`Test #${i+1}`;
+      const argStr=c.hidden?'(hidden input)':escapeHtml(c.args.map(a=>JSON.stringify(a)).join(', '));
+      const div=document.createElement('div');
+      div.className='case '+(o.ok?'ok':'no');
+      div.innerHTML=`<span class="tag ${o.ok?'ok':'no'}">${o.ok?'PASS':'FAIL'}</span>
+        <span class="detail"><b>${label}</b> &nbsp; in: ${argStr}<br>expected: <b>${escapeHtml(o.exp)}</b> &nbsp; got: <b>${escapeHtml(o.got)}</b></span>`;
+      results.appendChild(div);
+    });
+    const all=passed===out.length;
+    const sum=document.createElement('div');
+    sum.className='summary';sum.style.color=all?'var(--pass)':'var(--warn)';
+    sum.textContent=`${passed} / ${out.length} passed`+(all?`  ·  ${fmt(state.elapsed)} on the clock`:'');
+    results.prepend(sum);
+    state.status[id]=all?'pass':'fail';status.textContent="";
+
+    let html='', sawOutput=false;
+    buf.forEach(e=>{
+      if(e.k==='out' && e.s.charCodeAt(0)===1 && e.s[1]==='C'){
+        const ci=parseInt(e.s.slice(2)),c=p.cases[ci];
+        const lbl=c.hidden?`Hidden #${ci+1}`:`Test #${ci+1}`;
+        const a=c.hidden?'':'  in: '+escapeHtml(c.args.map(x=>JSON.stringify(x)).join(', '));
+        html+=`<span class="sys">— ${lbl}${a}\n</span>`;
+      }else{sawOutput=true;html+=`<span class="${e.k==='err'?'err':'out'}">${escapeHtml(e.s)}\n</span>`;}
+    });
+    if(!sawOutput) html+='<span class="sys">(no print output)\n</span>';
+    html+='\n';
+    out.forEach((o,i)=>{html+=`<span class="${o.ok?'res-ok':'res-no'}">${o.ok?'PASS':'FAIL'}  Test ${i+1}  →  expected ${escapeHtml(o.exp)}, got ${escapeHtml(o.got)}\n</span>`;});
+    html+=`<span class="${all?'res-ok':'res-no'}">\n>>> ${passed} / ${out.length} passed\n</span>`;
+    conbody.innerHTML=html;conbody.scrollTop=0;
+    renderChips();
+  }catch(e){
+    status.textContent="";
+    const div=document.createElement('div');div.className='case no';
+    div.innerHTML=`<span class="tag no">ERROR</span><span class="detail">${escapeHtml(String(e).split('\n').slice(-6).join('\n'))}</span>`;
+    results.appendChild(div);
+    let html='';
+    buf.forEach(e2=>{if(!(e2.k==='out'&&e2.s.charCodeAt(0)===1))html+=`<span class="${e2.k==='err'?'err':'out'}">${escapeHtml(e2.s)}\n</span>`;});
+    html+=`<span class="err">\nTraceback:\n${escapeHtml(String(e).split('\n').slice(-8).join('\n'))}\n</span>`;
+    conbody.innerHTML=html;
+    state.status[id]='attempt';renderChips();
+  }
+}
+
+renderTiers();renderChips();renderPanel();paintClock();
+</script>

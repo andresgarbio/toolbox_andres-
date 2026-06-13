@@ -1,0 +1,310 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0f1620; --panel:#161f2b; --panel2:#1d2937; --line:#2a3a4d;
+    --text:#c9d6e3; --muted:#7a8da0;
+    --signal:#f5a623; --warn:#ff5d5d; --pass:#34d6b4; --accent:#7aa2ff;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--text);font-family:var(--disp);-webkit-font-smoothing:antialiased;line-height:1.5}
+  .wrap{max-width:980px;margin:0 auto;padding:20px 18px 64px}
+  .bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--line);
+    background:linear-gradient(180deg,var(--panel2),var(--panel));border-radius:14px;padding:14px 18px;margin-bottom:14px}
+  .brand{display:flex;flex-direction:column;gap:2px;margin-right:auto}
+  .brand b{font-weight:700;letter-spacing:.04em;font-size:15px}
+  .brand span{font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase}
+  .swatch{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+  .clock{font-family:var(--mono);font-weight:600;font-size:34px;line-height:1;letter-spacing:.04em;color:var(--pass);min-width:128px;text-align:center;transition:color .3s}
+  .clock.run{color:var(--signal);text-shadow:0 0 22px rgba(245,166,35,.22)}
+  .clock.over{color:var(--warn);text-shadow:0 0 22px rgba(255,93,93,.28)}
+  .tgt{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em}
+  .controls{display:flex;gap:8px}
+  button{font-family:var(--disp);cursor:pointer;border-radius:9px;border:1px solid var(--line);background:var(--panel2);
+    color:var(--text);padding:8px 14px;font-size:13px;font-weight:500;transition:transform .06s,border-color .15s,background .15s}
+  button:hover{border-color:#3c5168}
+  button:active{transform:translateY(1px)}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .btn-go{background:var(--signal);color:#1a1205;border-color:transparent;font-weight:600}
+  .btn-go:hover{background:#ffb73a}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .chip{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:12.5px}
+  .chip[aria-selected="true"]{border-color:var(--signal);background:var(--panel2)}
+  .dot{width:8px;height:8px;border-radius:50%;background:#33485d;flex:none;transition:.2s}
+  .dot.pass{background:var(--pass);box-shadow:0 0 9px rgba(52,214,180,.6)}
+  .dot.fail{background:var(--warn);box-shadow:0 0 9px rgba(255,93,93,.6)}
+  .dot.attempt{background:var(--signal);box-shadow:0 0 9px rgba(245,166,35,.6)}
+  .panel{border:1px solid var(--line);background:var(--panel);border-radius:14px;overflow:hidden}
+  .phead{padding:18px 22px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .phead h2{margin:0 0 8px;font-size:19px;font-weight:600;letter-spacing:-.01em}
+  .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .badge{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.06em;padding:3px 9px;border-radius:6px;
+    border:1px solid rgba(245,166,35,.4);color:var(--signal);background:rgba(245,166,35,.08)}
+  .meta .t{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+  .pbody{padding:20px 22px}
+  .pbody p{margin:0 0 12px}
+  .pbody h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:20px 0 8px;font-weight:600}
+  .pbody code{font-family:var(--mono);font-size:12.5px;background:var(--panel2);padding:1.5px 6px;border-radius:5px;border:1px solid var(--line)}
+  .pbody ul{margin:0 0 12px;padding-left:18px}
+  .pbody li{margin:4px 0}
+  .ex{font-family:var(--mono);font-size:12.5px;background:#0c121b;border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin:8px 0;white-space:pre-wrap;color:#aebccd}
+  .ex b{color:var(--accent);font-weight:500}
+  .edwrap{margin-top:8px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#0b1019}
+  .edbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .edbar span{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  textarea{width:100%;min-height:240px;resize:vertical;border:0;outline:0;background:#0b1019;color:#dbe7f3;font-family:var(--mono);font-size:13px;line-height:1.65;padding:14px 16px;tab-size:4;white-space:pre;overflow-wrap:normal;overflow-x:auto}
+  .runrow{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
+  .status{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:auto}
+  .results{margin-top:14px;display:flex;flex-direction:column;gap:7px}
+  .case{border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-family:var(--mono);font-size:12px;display:flex;gap:12px;align-items:flex-start;background:var(--panel)}
+  .case.ok{border-color:rgba(52,214,180,.35)}
+  .case.no{border-color:rgba(255,93,93,.35)}
+  .tag{font-weight:600;flex:none}.tag.ok{color:var(--pass)}.tag.no{color:var(--warn)}
+  .case .detail{color:var(--muted);overflow-x:auto}
+  .case .detail b{color:var(--text);font-weight:500}
+  .summary{font-family:var(--mono);font-size:12.5px;padding:6px 0;font-weight:600}
+  .console{margin-top:14px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#0a0e15}
+  .conhead{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .conhead span{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+  .conhead .clr{font-size:11px;padding:3px 9px}
+  .conbody{font-family:var(--mono);font-size:12px;line-height:1.6;padding:12px 14px;white-space:pre-wrap;word-break:break-word;max-height:280px;overflow:auto;color:#aebccd;min-height:36px}
+  .conbody .out{color:#cdd9e6}.conbody .err{color:var(--warn)}.conbody .sys{color:var(--muted)}
+  .conbody .res-ok{color:var(--pass)}.conbody .res-no{color:var(--warn)}.conbody .empty{color:var(--muted);font-style:italic}
+  details.sol{margin-top:14px;border:1px solid var(--line);border-radius:11px;background:var(--panel2)}
+  details.sol summary{cursor:pointer;padding:12px 16px;font-size:13px;font-weight:500;list-style:none;display:flex;align-items:center;gap:8px;color:var(--muted)}
+  details.sol summary::-webkit-details-marker{display:none}
+  details.sol summary:hover{color:var(--text)}
+  details.sol[open] summary{border-bottom:1px solid var(--line);color:var(--text)}
+  .solbody{padding:16px}.solbody .ex{margin-top:0}.solbody p{font-size:13px;color:var(--text);margin:0 0 10px}
+  .pyhint{font-family:var(--mono);font-size:11px;color:var(--muted);padding:0 22px 18px}
+  @media(max-width:680px){.clock{font-size:28px;min-width:110px}.brand{order:-1;width:100%}}
+</style>
+
+<div class="wrap">
+  <div class="bar">
+    <div class="brand"><b>MATRIX &amp; SIMULATION DRILLS</b><span>5 grids · build the matrix, walk it carefully, mind the gotcha</span></div>
+    <div class="swatch"><div class="clock" id="clock">00:00</div><div class="tgt" id="tgt">target —</div></div>
+    <div class="controls"><button class="btn-go" id="startBtn">Start</button><button id="resetBtn">Reset</button></div>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="panel">
+    <div class="phead"><h2 id="ptitle"></h2><div class="meta" id="pmeta"></div></div>
+    <div class="pbody" id="pbody"></div>
+    <div class="pyhint" id="pyhint">Initializing Python runtime…</div>
+  </div>
+</div>
+
+<script>
+const PROBLEMS = [
+  { name:"Game of Life", pattern:"snapshot, then update", target:1200, targetLabel:"20:00",
+    title:"Conway's Game of Life — one step",
+    html:`<p>A grid of cells, each <code>1</code> (alive) or <code>0</code> (dead). Compute the <b>next</b> state from these rules, counting all 8 neighbors:</p>
+      <ul>
+        <li>A live cell with 2 or 3 live neighbors stays alive; otherwise it dies.</li>
+        <li>A dead cell with exactly 3 live neighbors becomes alive.</li>
+      </ul>
+      <p>All cells update <b>simultaneously</b> from the original grid. Return the next state.</p>
+      <div class="ex"><b>In:</b> [[0,1,0],[0,0,1],[1,1,1],[0,0,0]]
+<b>Out:</b> [[0,0,0],[1,0,1],[0,1,1],[0,1,0]]</div>`,
+    sig:"def solution(board):\n    ",
+    cases:[
+      {args:[[[0,1,0],[0,0,1],[1,1,1],[0,0,0]]],expected:[[0,0,0],[1,0,1],[0,1,1],[0,1,0]]},
+      {args:[[[1,1],[1,1]]],expected:[[1,1],[1,1]]},
+      {args:[[[0,0],[0,0]]],expected:[[0,0],[0,0]],hidden:true},
+      {args:[[[1]]],expected:[[0]],hidden:true},
+    ],
+    sol:"def solution(board):\n    R, C = len(board), len(board[0])\n    res = [[0] * C for _ in range(R)]      # fresh grid -> simultaneous update\n    for r in range(R):\n        for c in range(C):\n            live = 0\n            for dr in (-1, 0, 1):\n                for dc in (-1, 0, 1):\n                    if dr == 0 and dc == 0:\n                        continue\n                    nr, nc = r + dr, c + dc\n                    if 0 <= nr < R and 0 <= nc < C:\n                        live += board[nr][nc]\n            if board[r][c] == 1:\n                res[r][c] = 1 if live in (2, 3) else 0\n            else:\n                res[r][c] = 1 if live == 3 else 0\n    return res",
+    note:"The whole trap is 'simultaneously'. If you overwrite cells in place, later cells read already-updated neighbors and the generation is wrong. Writing into a fresh <code>res</code> grid keeps every read pointing at the original. The 8-neighbor count is the nested <code>(-1,0,1)×(-1,0,1)</code> loop, skipping <code>(0,0)</code>. Since cells are 0/1, summing them counts the live ones directly." },
+
+  { name:"Rotate 90°", pattern:"index remapping", target:900, targetLabel:"15:00",
+    title:"Rotate Image 90° Clockwise",
+    html:`<p>Given an <code>n × n</code> matrix, return it rotated 90 degrees clockwise.</p>
+      <div class="ex"><b>In:</b> [[1,2,3],[4,5,6],[7,8,9]]
+<b>Out:</b> [[7,4,1],[8,5,2],[9,6,3]]</div>
+      <p style="color:var(--muted);font-size:12.5px">Work out where one cell goes, then let a comprehension do the rest. The top row becomes the right column.</p>`,
+    sig:"def solution(matrix):\n    ",
+    cases:[
+      {args:[[[1,2],[3,4]]],expected:[[3,1],[4,2]]},
+      {args:[[[1,2,3],[4,5,6],[7,8,9]]],expected:[[7,4,1],[8,5,2],[9,6,3]]},
+      {args:[[[1]]],expected:[[1]],hidden:true},
+      {args:[[[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]]],expected:[[13,9,5,1],[14,10,6,2],[15,11,7,3],[16,12,8,4]],hidden:true},
+    ],
+    sol:"def solution(matrix):\n    n = len(matrix)\n    return [[matrix[n - 1 - c][r] for c in range(n)] for r in range(n)]\n\n# equivalent and easier to remember: transpose, then reverse each row\n# def solution(matrix):\n#     return [list(row)[::-1] for row in zip(*matrix)]",
+    note:"For a clockwise rotation, the new cell at <code>(r, c)</code> comes from the old cell at <code>(n-1-c, r)</code>. If the index math is hard to recall under pressure, the <code>zip(*matrix)</code> transpose plus reversing each row gives the same result and is easier to reconstruct from scratch." },
+
+  { name:"Set Zeroes", pattern:"two-pass: mark, then apply", target:900, targetLabel:"15:00",
+    title:"Set Matrix Zeroes",
+    html:`<p>Given an <code>m × n</code> matrix, if a cell is <code>0</code>, set its entire row and column to <code>0</code>. Return the modified matrix.</p>
+      <div class="ex"><b>In:</b> [[1,1,1],[1,0,1],[1,1,1]]
+<b>Out:</b> [[1,0,1],[0,0,0],[1,0,1]]</div>
+      <p style="color:var(--muted);font-size:12.5px">Find every original zero first. If you zero rows as you find them, you'll cascade and wipe the whole grid.</p>`,
+    sig:"def solution(matrix):\n    ",
+    cases:[
+      {args:[[[1,1,1],[1,0,1],[1,1,1]]],expected:[[1,0,1],[0,0,0],[1,0,1]]},
+      {args:[[[0,1,2,0],[3,4,5,2],[1,3,1,5]]],expected:[[0,0,0,0],[0,4,5,0],[0,3,1,0]]},
+      {args:[[[1,2],[3,4]]],expected:[[1,2],[3,4]],hidden:true},
+      {args:[[[0]]],expected:[[0]],hidden:true},
+    ],
+    sol:"def solution(matrix):\n    R, C = len(matrix), len(matrix[0])\n    rows, cols = set(), set()\n    for r in range(R):                 # pass 1: record where the zeros ARE\n        for c in range(C):\n            if matrix[r][c] == 0:\n                rows.add(r)\n                cols.add(c)\n    for r in range(R):                 # pass 2: apply, using the recorded sets\n        for c in range(C):\n            if r in rows or c in cols:\n                matrix[r][c] = 0\n    return matrix",
+    note:"The cascade bug: zero out a row the instant you see a 0, and those new zeros trigger more rows/columns, until the grid is blank. The fix is two passes — first record which rows and columns contained an original zero, then apply. Sets give O(1) membership in pass 2." },
+
+  { name:"Flood Fill", pattern:"grid BFS fill", target:900, targetLabel:"15:00",
+    title:"Flood Fill",
+    html:`<p>Given an <code>image</code> grid, a starting pixel <code>(sr, sc)</code>, and a new <code>color</code>: recolor the starting pixel and every pixel connected to it (up/down/left/right) that shares the <b>original</b> color. Return the image.</p>
+      <div class="ex"><b>In:</b> image=[[1,1,1],[1,1,0],[1,0,1]], sr=1, sc=1, color=2
+<b>Out:</b> [[2,2,2],[2,2,0],[2,0,1]]</div>
+      <p style="color:var(--muted);font-size:12.5px">Standard grid traversal. Watch the case where the new color equals the original.</p>`,
+    sig:"def solution(image, sr, sc, color):\n    ",
+    cases:[
+      {args:[[[1,1,1],[1,1,0],[1,0,1]],1,1,2],expected:[[2,2,2],[2,2,0],[2,0,1]]},
+      {args:[[[0,0,0],[0,0,0]],0,0,5],expected:[[5,5,5],[5,5,5]]},
+      {args:[[[0,0,0],[0,1,1]],1,1,1],expected:[[0,0,0],[0,1,1]],hidden:true},
+      {args:[[[1]],0,0,9],expected:[[9]],hidden:true},
+    ],
+    sol:"def solution(image, sr, sc, color):\n    from collections import deque\n    R, C = len(image), len(image[0])\n    start = image[sr][sc]\n    if start == color:          # already that color -> nothing to do (avoids infinite loop)\n        return image\n    q = deque([(sr, sc)])\n    image[sr][sc] = color\n    while q:\n        r, c = q.popleft()\n        for dr, dc in ((1,0),(-1,0),(0,1),(0,-1)):\n            nr, nc = r + dr, c + dc\n            if 0 <= nr < R and 0 <= nc < C and image[nr][nc] == start:\n                image[nr][nc] = color\n                q.append((nr, nc))\n    return image",
+    note:"BFS from the start pixel, spreading only to 4-neighbors that still hold the original color. Recolor a cell the moment you enqueue it — that doubles as your 'visited' marker, since a recolored cell no longer matches <code>start</code>. The <code>start == color</code> guard is essential: without it, recoloring never changes anything to match against and the queue never drains." },
+
+  { name:"Count Islands", pattern:"connected components (BFS + visited)", target:1200, targetLabel:"20:00",
+    title:"Number of Islands",
+    html:`<p>Given a grid of <code>1</code> (land) and <code>0</code> (water), count the islands. An island is a group of <code>1</code>s connected up/down/left/right.</p>
+      <div class="ex"><b>In:</b> [[1,1,0],[0,1,0],[0,0,1]]
+<b>Out:</b> 2</div>
+      <p style="color:var(--muted);font-size:12.5px">Scan every cell; each unseen piece of land starts a new island, then flood its whole component so you don't recount it.</p>`,
+    sig:"def solution(grid):\n    ",
+    cases:[
+      {args:[[[1,1,0],[0,1,0],[0,0,1]]],expected:2},
+      {args:[[[1,1,1],[1,1,1]]],expected:1},
+      {args:[[[0,0],[0,0]]],expected:0,hidden:true},
+      {args:[[[1,0,1,0,1]]],expected:3,hidden:true},
+      {args:[[[]]],expected:0,hidden:true},
+    ],
+    sol:"def solution(grid):\n    if not grid or not grid[0]:\n        return 0\n    from collections import deque\n    R, C = len(grid), len(grid[0])\n    seen = [[False] * C for _ in range(R)]\n    count = 0\n    for r in range(R):\n        for c in range(C):\n            if grid[r][c] == 1 and not seen[r][c]:\n                count += 1                       # new island found\n                q = deque([(r, c)])\n                seen[r][c] = True\n                while q:                          # flood the whole component\n                    cr, cc = q.popleft()\n                    for dr, dc in ((1,0),(-1,0),(0,1),(0,-1)):\n                        nr, nc = cr + dr, cc + dc\n                        if 0 <= nr < R and 0 <= nc < C and grid[nr][nc] == 1 and not seen[nr][nc]:\n                            seen[nr][nc] = True\n                            q.append((nr, nc))\n    return count",
+    note:"The outer double loop finds a starting cell; each time it hits unvisited land, that's one new island, and the inner BFS marks the entire connected blob so the outer loop never counts it again. Mark cells seen when you enqueue them, not when you dequeue, or the same cell gets added many times. This 'count components by flooding each one' pattern is the same engine as flood fill, wrapped in a counter." },
+];
+
+const state = { prob:0, code:{}, status:{}, elapsed:0, running:false, timer:null };
+PROBLEMS.forEach((p,i)=>{ state.code[i]=p.sig; state.status[i]='none'; });
+const clock=document.getElementById('clock'), tgt=document.getElementById('tgt'), pyhint=document.getElementById('pyhint');
+function fmt(s){const m=Math.floor(s/60),x=s%60;return String(m).padStart(2,'0')+':'+String(x).padStart(2,'0');}
+function curTarget(){return PROBLEMS[state.prob].target;}
+function paintClock(){
+  clock.textContent=fmt(state.elapsed);
+  clock.classList.toggle('run', state.running && state.elapsed<curTarget());
+  clock.classList.toggle('over', state.elapsed>=curTarget());
+  tgt.textContent='target '+PROBLEMS[state.prob].targetLabel;
+}
+function tick(){state.elapsed++;paintClock();}
+document.getElementById('startBtn').onclick=function(){
+  if(state.running){clearInterval(state.timer);state.running=false;this.textContent='Resume';}
+  else{state.timer=setInterval(tick,1000);state.running=true;this.textContent='Pause';}
+  paintClock();
+};
+document.getElementById('resetBtn').onclick=function(){clearInterval(state.timer);state.running=false;state.elapsed=0;document.getElementById('startBtn').textContent='Start';paintClock();};
+function resetClock(){clearInterval(state.timer);state.running=false;state.elapsed=0;document.getElementById('startBtn').textContent='Start';paintClock();}
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function saveCode(){const ta=document.getElementById('editor');if(ta)state.code[state.prob]=ta.value;}
+
+function renderChips(){
+  const el=document.getElementById('chips');el.innerHTML='';
+  PROBLEMS.forEach((p,i)=>{
+    const c=document.createElement('button');
+    c.className='chip';c.setAttribute('aria-selected',i===state.prob);
+    c.innerHTML=`<span class="dot ${state.status[i]==='pass'?'pass':state.status[i]==='fail'?'fail':state.status[i]==='attempt'?'attempt':''}"></span>${i+1}. ${p.name}`;
+    c.onclick=()=>{saveCode();state.prob=i;resetClock();renderChips();renderPanel();};
+    el.appendChild(c);
+  });
+}
+function renderPanel(){
+  const p=PROBLEMS[state.prob], id=state.prob;
+  document.getElementById('ptitle').textContent=p.title;
+  document.getElementById('pmeta').innerHTML=`<span class="badge">${p.pattern}</span><span class="t">target ${p.targetLabel}</span><span class="t">·</span><span class="t"><code style="font-family:var(--mono)">solution(...)</code></span>`;
+  document.getElementById('pbody').innerHTML=`${p.html}
+    <h3>Your Solution</h3>
+    <div class="edwrap"><div class="edbar"><span>solution.py</span><span>Tab inserts 4 spaces</span></div><textarea id="editor" spellcheck="false"></textarea></div>
+    <div class="runrow"><button class="btn-go" id="runBtn">Run Tests</button><button id="resetCodeBtn">Reset code</button><span class="status" id="runStatus"></span></div>
+    <div class="results" id="results"></div>
+    <div class="console" id="console"><div class="conhead"><span>CONSOLE — stdout / test output</span><button class="clr" id="clrBtn">Clear</button></div>
+      <div class="conbody" id="conbody"><span class="empty">Run tests to see print() output and per-case results here.</span></div></div>
+    <details class="sol" id="solBox"><summary id="solSummary">Reveal reference solution</summary><div class="solbody"><p>${p.note}</p><div class="ex">${escapeHtml(p.sol)}</div></div></details>`;
+  const ta=document.getElementById('editor');ta.value=state.code[id];
+  ta.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const s=ta.selectionStart,en=ta.selectionEnd;ta.value=ta.value.slice(0,s)+'    '+ta.value.slice(en);ta.selectionStart=ta.selectionEnd=s+4;}});
+  document.getElementById('runBtn').onclick=()=>runTests();
+  document.getElementById('resetCodeBtn').onclick=()=>{ta.value=p.sig;state.code[id]=p.sig;};
+  document.getElementById('clrBtn').onclick=()=>{document.getElementById('conbody').innerHTML='<span class="empty">Console cleared.</span>';};
+  const solBox=document.getElementById('solBox');
+  solBox.querySelector('summary').addEventListener('click',ev=>{
+    if(!solBox.open && !solBox.dataset.ok){ev.preventDefault();
+      if(confirm("Reveal the reference solution? Try your own first.")){solBox.dataset.ok="1";solBox.open=true;solBox.querySelector('summary').textContent="Reference solution";}}
+  });
+}
+
+let pyodide=null, pyState='loading';
+(function loadPy(){
+  const s=document.createElement('script');s.src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js";
+  s.onload=async()=>{try{pyodide=await loadPyodide({indexURL:"https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"});pyState='ready';pyhint.textContent="Python runtime ready — write your solution and Run Tests.";}
+    catch(e){pyState='fail';pyhint.textContent="Python runtime failed to load. Tasks and solutions still work — run code in your own IDE.";}};
+  s.onerror=()=>{pyState='fail';pyhint.textContent="Couldn't reach the Python runtime (network blocked). Tasks and solutions still work — run code locally.";};
+  document.head.appendChild(s);
+})();
+
+async function runTests(){
+  const status=document.getElementById('runStatus'),results=document.getElementById('results'),conbody=document.getElementById('conbody');
+  saveCode();
+  if(pyState==='loading'){status.textContent="runtime still loading…";return;}
+  if(pyState==='fail'){status.textContent="runtime unavailable — run locally";return;}
+  status.textContent="running…";results.innerHTML='';conbody.innerHTML='<span class="sys">running…</span>';
+  const p=PROBLEMS[state.prob],id=state.prob,code=state.code[id];
+  const casesJson=JSON.stringify(p.cases.map(c=>({args:c.args,expected:c.expected})));
+  const harness=[code,"import json as _json","_cases=_json.loads(_CASES_JSON)","_out=[]",
+    "for _i,_c in enumerate(_cases):","    print('\\x01C'+str(_i))","    try:","        _r=solution(*_c['args'])",
+    "        _out.append({'ok':_r==_c['expected'],'got':repr(_r),'exp':repr(_c['expected'])})",
+    "    except Exception as _e:","        _out.append({'ok':False,'got':'ERROR: '+str(_e),'exp':repr(_c['expected'])})","_json.dumps(_out)"].join("\n");
+  const buf=[];
+  try{
+    pyodide.setStdout({batched:s=>buf.push({k:'out',s})});
+    pyodide.setStderr({batched:s=>buf.push({k:'err',s})});
+    pyodide.globals.set("_CASES_JSON",casesJson);
+    const raw=await pyodide.runPythonAsync(harness);
+    const out=JSON.parse(raw);let passed=0;
+    out.forEach((o,i)=>{
+      if(o.ok)passed++;
+      const c=p.cases[i];const label=c.hidden?`Hidden #${i+1}`:`Test #${i+1}`;
+      const argStr=c.hidden?'(hidden input)':escapeHtml(c.args.map(a=>JSON.stringify(a)).join(', '));
+      const div=document.createElement('div');div.className='case '+(o.ok?'ok':'no');
+      div.innerHTML=`<span class="tag ${o.ok?'ok':'no'}">${o.ok?'PASS':'FAIL'}</span><span class="detail"><b>${label}</b> &nbsp; in: ${argStr}<br>expected: <b>${escapeHtml(o.exp)}</b> &nbsp; got: <b>${escapeHtml(o.got)}</b></span>`;
+      results.appendChild(div);
+    });
+    const all=passed===out.length;
+    const sum=document.createElement('div');sum.className='summary';sum.style.color=all?'var(--pass)':'var(--warn)';
+    sum.textContent=`${passed} / ${out.length} passed`+(all?`  ·  ${fmt(state.elapsed)} on the clock`:'');
+    results.prepend(sum);state.status[id]=all?'pass':'fail';status.textContent="";
+    let html='',sawOutput=false;
+    buf.forEach(e=>{
+      if(e.k==='out'&&e.s.charCodeAt(0)===1&&e.s[1]==='C'){const ci=parseInt(e.s.slice(2)),c=p.cases[ci];
+        const lbl=c.hidden?`Hidden #${ci+1}`:`Test #${ci+1}`;const a=c.hidden?'':'  in: '+escapeHtml(c.args.map(x=>JSON.stringify(x)).join(', '));
+        html+=`<span class="sys">— ${lbl}${a}\n</span>`;}
+      else{sawOutput=true;html+=`<span class="${e.k==='err'?'err':'out'}">${escapeHtml(e.s)}\n</span>`;}
+    });
+    if(!sawOutput)html+='<span class="sys">(no print output)\n</span>';
+    html+='\n';
+    out.forEach((o,i)=>{html+=`<span class="${o.ok?'res-ok':'res-no'}">${o.ok?'PASS':'FAIL'}  Test ${i+1}  →  expected ${escapeHtml(o.exp)}, got ${escapeHtml(o.got)}\n</span>`;});
+    html+=`<span class="${all?'res-ok':'res-no'}">\n>>> ${passed} / ${out.length} passed\n</span>`;
+    conbody.innerHTML=html;conbody.scrollTop=0;renderChips();
+  }catch(e){
+    status.textContent="";
+    const div=document.createElement('div');div.className='case no';
+    div.innerHTML=`<span class="tag no">ERROR</span><span class="detail">${escapeHtml(String(e).split('\n').slice(-6).join('\n'))}</span>`;
+    results.appendChild(div);
+    let html='';buf.forEach(e2=>{if(!(e2.k==='out'&&e2.s.charCodeAt(0)===1))html+=`<span class="${e2.k==='err'?'err':'out'}">${escapeHtml(e2.s)}\n</span>`;});
+    html+=`<span class="err">\nTraceback:\n${escapeHtml(String(e).split('\n').slice(-8).join('\n'))}\n</span>`;
+    document.getElementById('conbody').innerHTML=html;
+    state.status[id]='attempt';renderChips();
+  }
+}
+renderChips();renderPanel();paintClock();
+</script>

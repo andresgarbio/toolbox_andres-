@@ -1,0 +1,295 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0f1620; --panel:#161f2b; --panel2:#1d2937; --line:#2a3a4d;
+    --text:#c9d6e3; --muted:#7a8da0;
+    --signal:#f5a623; --warn:#ff5d5d; --pass:#34d6b4; --accent:#7aa2ff;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--text);font-family:var(--disp);-webkit-font-smoothing:antialiased;line-height:1.5}
+  .wrap{max-width:980px;margin:0 auto;padding:20px 18px 64px}
+  .bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--line);
+    background:linear-gradient(180deg,var(--panel2),var(--panel));border-radius:14px;padding:14px 18px;margin-bottom:14px}
+  .brand{display:flex;flex-direction:column;gap:2px;margin-right:auto}
+  .brand b{font-weight:700;letter-spacing:.04em;font-size:15px}
+  .brand span{font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase}
+  .swatch{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+  .clock{font-family:var(--mono);font-weight:600;font-size:34px;line-height:1;letter-spacing:.04em;color:var(--pass);min-width:128px;text-align:center;transition:color .3s}
+  .clock.run{color:var(--signal);text-shadow:0 0 22px rgba(245,166,35,.22)}
+  .clock.over{color:var(--warn);text-shadow:0 0 22px rgba(255,93,93,.28)}
+  .tgt{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em}
+  .controls{display:flex;gap:8px}
+  button{font-family:var(--disp);cursor:pointer;border-radius:9px;border:1px solid var(--line);background:var(--panel2);
+    color:var(--text);padding:8px 14px;font-size:13px;font-weight:500;transition:transform .06s,border-color .15s,background .15s}
+  button:hover{border-color:#3c5168}
+  button:active{transform:translateY(1px)}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .btn-go{background:var(--signal);color:#1a1205;border-color:transparent;font-weight:600}
+  .btn-go:hover{background:#ffb73a}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .chip{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:12.5px}
+  .chip[aria-selected="true"]{border-color:var(--signal);background:var(--panel2)}
+  .dot{width:8px;height:8px;border-radius:50%;background:#33485d;flex:none;transition:.2s}
+  .dot.pass{background:var(--pass);box-shadow:0 0 9px rgba(52,214,180,.6)}
+  .dot.fail{background:var(--warn);box-shadow:0 0 9px rgba(255,93,93,.6)}
+  .dot.attempt{background:var(--signal);box-shadow:0 0 9px rgba(245,166,35,.6)}
+  .panel{border:1px solid var(--line);background:var(--panel);border-radius:14px;overflow:hidden}
+  .phead{padding:18px 22px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .phead h2{margin:0 0 8px;font-size:19px;font-weight:600;letter-spacing:-.01em}
+  .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .badge{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.06em;padding:3px 9px;border-radius:6px;
+    border:1px solid rgba(122,162,255,.4);color:var(--accent);background:rgba(122,162,255,.08)}
+  .meta .t{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+  .pbody{padding:20px 22px}
+  .pbody p{margin:0 0 12px}
+  .pbody h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:20px 0 8px;font-weight:600}
+  .pbody code{font-family:var(--mono);font-size:12.5px;background:var(--panel2);padding:1.5px 6px;border-radius:5px;border:1px solid var(--line)}
+  .pbody ul{margin:0 0 12px;padding-left:18px}
+  .pbody li{margin:4px 0}
+  .ex{font-family:var(--mono);font-size:12.5px;background:#0c121b;border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin:8px 0;white-space:pre-wrap;color:#aebccd}
+  .ex b{color:var(--accent);font-weight:500}
+  .edwrap{margin-top:8px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#0b1019}
+  .edbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .edbar span{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  textarea{width:100%;min-height:230px;resize:vertical;border:0;outline:0;background:#0b1019;color:#dbe7f3;font-family:var(--mono);font-size:13px;line-height:1.65;padding:14px 16px;tab-size:4;white-space:pre;overflow-wrap:normal;overflow-x:auto}
+  .runrow{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
+  .status{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:auto}
+  .results{margin-top:14px;display:flex;flex-direction:column;gap:7px}
+  .case{border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-family:var(--mono);font-size:12px;display:flex;gap:12px;align-items:flex-start;background:var(--panel)}
+  .case.ok{border-color:rgba(52,214,180,.35)}
+  .case.no{border-color:rgba(255,93,93,.35)}
+  .tag{font-weight:600;flex:none}.tag.ok{color:var(--pass)}.tag.no{color:var(--warn)}
+  .case .detail{color:var(--muted);overflow-x:auto}
+  .case .detail b{color:var(--text);font-weight:500}
+  .summary{font-family:var(--mono);font-size:12.5px;padding:6px 0;font-weight:600}
+  .console{margin-top:14px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#0a0e15}
+  .conhead{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .conhead span{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+  .conhead .clr{font-size:11px;padding:3px 9px}
+  .conbody{font-family:var(--mono);font-size:12px;line-height:1.6;padding:12px 14px;white-space:pre-wrap;word-break:break-word;max-height:280px;overflow:auto;color:#aebccd;min-height:36px}
+  .conbody .out{color:#cdd9e6}.conbody .err{color:var(--warn)}.conbody .sys{color:var(--muted)}
+  .conbody .res-ok{color:var(--pass)}.conbody .res-no{color:var(--warn)}.conbody .empty{color:var(--muted);font-style:italic}
+  details.sol{margin-top:14px;border:1px solid var(--line);border-radius:11px;background:var(--panel2)}
+  details.sol summary{cursor:pointer;padding:12px 16px;font-size:13px;font-weight:500;list-style:none;display:flex;align-items:center;gap:8px;color:var(--muted)}
+  details.sol summary::-webkit-details-marker{display:none}
+  details.sol summary:hover{color:var(--text)}
+  details.sol[open] summary{border-bottom:1px solid var(--line);color:var(--text)}
+  .solbody{padding:16px}.solbody .ex{margin-top:0}.solbody p{font-size:13px;color:var(--text);margin:0 0 10px}
+  .pyhint{font-family:var(--mono);font-size:11px;color:var(--muted);padding:0 22px 18px}
+  @media(max-width:680px){.clock{font-size:28px;min-width:110px}.brand{order:-1;width:100%}}
+</style>
+
+<div class="wrap">
+  <div class="bar">
+    <div class="brand"><b>DICTIONARY DRILLS</b><span>7 reps · the seen-it / remember-don't-search muscle</span></div>
+    <div class="swatch"><div class="clock" id="clock">00:00</div><div class="tgt" id="tgt">target —</div></div>
+    <div class="controls"><button class="btn-go" id="startBtn">Start</button><button id="resetBtn">Reset</button></div>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="panel">
+    <div class="phead"><h2 id="ptitle"></h2><div class="meta" id="pmeta"></div></div>
+    <div class="pbody" id="pbody"></div>
+    <div class="pyhint" id="pyhint">Initializing Python runtime…</div>
+  </div>
+</div>
+
+<script>
+const PROBLEMS = [
+  { name:"Has Duplicate", pattern:"seen-set", target:180, targetLabel:"3:00",
+    title:"Has Duplicate (warm-up)",
+    html:`<p>Return <code>True</code> if any value in <code>a</code> appears more than once, else <code>False</code>.</p>
+      <div class="ex"><b>In:</b> [1,2,3,1]  <b>Out:</b> True</div>
+      <p style="color:var(--muted);font-size:12.5px">The foundation move: remember what you've seen, check membership in O(1). A set is a dict without values.</p>`,
+    sig:"def solution(a):\n    ",
+    cases:[{args:[[1,2,3,1]],expected:true},{args:[[1,2,3]],expected:false},{args:[[]],expected:false,hidden:true},{args:[[5,5]],expected:true,hidden:true}],
+    sol:"def solution(a):\n    seen = set()\n    for x in a:\n        if x in seen:\n            return True\n        seen.add(x)\n    return False",
+    note:"Check before you add: if x is already in <code>seen</code>, it's a repeat. The early return makes it O(n) and stops at the first duplicate. Sorting the list to find adjacent equals would also work but costs O(n log n) and mutates input." },
+
+  { name:"Count Equal Pairs", pattern:"frequency map", target:360, targetLabel:"6:00",
+    title:"Count Equal Pairs",
+    html:`<p>Count the number of index pairs <code>(i, j)</code> with <code>i &lt; j</code> and <code>a[i] == a[j]</code>.</p>
+      <div class="ex"><b>In:</b> [1,1,2,2]  <b>Out:</b> 2</div>
+      <p style="color:var(--muted);font-size:12.5px">Don't loop over pairs. Count how many of each value, then do the combinatorics per bucket.</p>`,
+    sig:"def solution(a):\n    ",
+    cases:[{args:[[1,1,1]],expected:3},{args:[[1,2,3]],expected:0},{args:[[1,1,2,2]],expected:2,hidden:true},{args:[[5]],expected:0,hidden:true},{args:[[3,3,3,3]],expected:6,hidden:true}],
+    sol:"def solution(a):\n    from collections import Counter\n    c = Counter(a)\n    return sum(v * (v - 1) // 2 for v in c.values())",
+    note:"If a value appears <code>v</code> times, it forms <code>v*(v-1)/2</code> pairs (choose 2). Count once, then sum the per-value pair counts. Comparing every pair directly is O(n²); this is O(n). Same 'bucket by value, then combine' idea as the divisible-pairs problem." },
+
+  { name:"Two Sum", pattern:"complement lookup (value → index)", target:360, targetLabel:"6:00",
+    title:"Two Sum (indices)",
+    html:`<p>Return the indices <code>[i, j]</code> (<code>i &lt; j</code>) of the two values summing to <code>target</code>. Exactly one solution exists.</p>
+      <div class="ex"><b>In:</b> a=[2,7,11,15], target=9  <b>Out:</b> [0,1]</div>
+      <p style="color:var(--muted);font-size:12.5px">Map value → index as you go. Look for the complement <em>before</em> inserting the current value.</p>`,
+    sig:"def solution(a, target):\n    ",
+    cases:[{args:[[2,7,11,15],9],expected:[0,1]},{args:[[3,2,4],6],expected:[1,2]},{args:[[3,3],6],expected:[0,1],hidden:true},{args:[[1,5,3,7],10],expected:[2,3],hidden:true}],
+    sol:"def solution(a, target):\n    pos = {}                       # value -> index\n    for i, x in enumerate(a):\n        if target - x in pos:\n            return [pos[target - x], i]\n        pos[x] = i\n    return []",
+    note:"A dict turns 'find the complement' from an O(n) scan into an O(1) lookup, so the whole thing is one pass. Checking before inserting guarantees the earlier index comes first and never pairs a value with itself. This is the same remember-don't-search move as complement-counting." },
+
+  { name:"Anagram Groups", pattern:"tuple as key", target:480, targetLabel:"8:00",
+    title:"Count Anagram Groups",
+    html:`<p>Given a list of lowercase words, return how many groups of anagrams there are. Two words are anagrams if one is a rearrangement of the other.</p>
+      <div class="ex"><b>In:</b> ["eat","tea","tan","ate","nat","bat"]  <b>Out:</b> 3</div>
+      <p style="color:var(--muted);font-size:12.5px">All anagrams share the same sorted letters. Use that as a dict key — and a key must be immutable, so a tuple, not a list.</p>`,
+    sig:"def solution(words):\n    ",
+    cases:[{args:[["eat","tea","tan","ate","nat","bat"]],expected:3},{args:[["a"]],expected:1},{args:[["abc","cba","xyz"]],expected:2,hidden:true},{args:[[]],expected:0,hidden:true}],
+    sol:"def solution(words):\n    from collections import defaultdict\n    groups = defaultdict(list)\n    for w in words:\n        key = tuple(sorted(w))     # 'eat' -> ('a','e','t'); immutable -> hashable\n        groups[key].append(w)\n    return len(groups)",
+    note:"<code>sorted('eat')</code> gives a list, which can't be a dict key, so wrap it in <code>tuple(...)</code>. Every anagram maps to the same key, so the number of distinct keys is the number of groups. This is the tuple-as-key trick — the same one that lets you do <code>seen[(row, col)]</code> on grids." },
+
+  { name:"Largest Letter Group", pattern:"defaultdict grouping", target:420, targetLabel:"7:00",
+    title:"Largest First-Letter Group",
+    html:`<p>Given a list of words, group them by their first letter and return the size of the largest group. Return 0 for an empty list.</p>
+      <div class="ex"><b>In:</b> ["apple","ant","bee","bear","cat"]  <b>Out:</b> 2</div>
+      <p style="color:var(--muted);font-size:12.5px">A dict from key → count (or list). <code>defaultdict</code> skips the "does this key exist yet?" check.</p>`,
+    sig:"def solution(words):\n    ",
+    cases:[{args:[["apple","ant","bee","bear","cat"]],expected:2},{args:[[]],expected:0},{args:[["x"]],expected:1,hidden:true},{args:[["a","apple","avocado","b"]],expected:3,hidden:true}],
+    sol:"def solution(words):\n    from collections import defaultdict\n    groups = defaultdict(int)\n    for w in words:\n        groups[w[0]] += 1          # missing key auto-starts at 0\n    return max(groups.values()) if groups else 0",
+    note:"<code>defaultdict(int)</code> means a never-seen key starts at 0, so <code>+= 1</code> just works without a guard. Guard the final <code>max</code> against the empty case. Use <code>defaultdict(list)</code> instead if you need the actual words, not just the count." },
+
+  { name:"Subarray Sum = K", pattern:"prefix-sum dict", target:720, targetLabel:"12:00",
+    title:"Subarray Sum Equals K",
+    html:`<p>Given an integer array <code>a</code> and integer <code>k</code>, return the number of contiguous subarrays whose sum equals <code>k</code>. Values can be negative.</p>
+      <div class="ex"><b>In:</b> a=[1,1,1], k=2  <b>Out:</b> 2</div>
+      <p style="color:var(--muted);font-size:12.5px">A running sum, plus a dict counting how often each running-sum value has appeared. The classic prefix-sum + hashmap.</p>`,
+    sig:"def solution(a, k):\n    ",
+    cases:[{args:[[1,1,1],2],expected:2},{args:[[1,2,3],3],expected:2},{args:[[1],0],expected:0,hidden:true},{args:[[0,0,0],0],expected:6,hidden:true},{args:[[3,4,7,2,-3,1,4,2],7],expected:4,hidden:true}],
+    sol:"def solution(a, k):\n    from collections import defaultdict\n    seen = defaultdict(int)\n    seen[0] = 1            # a prefix sum of 0 has occurred once (empty prefix)\n    total = 0\n    s = 0\n    for x in a:\n        s += x                 # running prefix sum\n        total += seen[s - k]   # how many earlier prefixes make a window of sum k\n        seen[s] += 1\n    return total",
+    note:"If the running sum is <code>s</code> now and was <code>s - k</code> at some earlier point, the slice between them sums to <code>k</code>. So you count how many times <code>s - k</code> has been seen. Seeding <code>seen[0] = 1</code> handles subarrays that start at index 0. This beats the O(n²) 'try every start/end' by remembering prefix sums — the same engine as two-sum, one level up." },
+
+  { name:"Longest Unique Substring", pattern:"sliding window + dict", target:720, targetLabel:"12:00",
+    title:"Longest Substring Without Repeats",
+    html:`<p>Given a string <code>s</code>, return the length of the longest substring with no repeating characters.</p>
+      <div class="ex"><b>In:</b> "abcabcbb"  <b>Out:</b> 3   ("abc")</div>
+      <p style="color:var(--muted);font-size:12.5px">Combine the two patterns: a window that grows right and jumps its left edge using a dict of each char's last-seen index.</p>`,
+    sig:"def solution(s):\n    ",
+    cases:[{args:["abcabcbb"],expected:3},{args:["bbbbb"],expected:1},{args:["pwwkew"],expected:3,hidden:true},{args:[""],expected:0,hidden:true},{args:["abba"],expected:2,hidden:true}],
+    sol:"def solution(s):\n    last = {}        # char -> its most recent index\n    start = 0        # left edge of the current window\n    best = 0\n    for i, c in enumerate(s):\n        if c in last and last[c] >= start:\n            start = last[c] + 1     # jump left edge past the previous c\n        last[c] = i\n        best = max(best, i - start + 1)\n    return best",
+    note:"The window <code>[start, i]</code> always holds unique chars. When you hit a char seen inside the window, jump <code>start</code> to just past its last position. The <code>last[c] >= start</code> check matters: a repeat that's already left the window (like the first 'a' in 'abba') must not drag <code>start</code> backward. Window + dict, working together." },
+];
+
+const state = { prob:0, code:{}, status:{}, elapsed:0, running:false, timer:null };
+PROBLEMS.forEach((p,i)=>{ state.code[i]=p.sig; state.status[i]='none'; });
+const clock=document.getElementById('clock'), tgt=document.getElementById('tgt'), pyhint=document.getElementById('pyhint');
+function fmt(s){const m=Math.floor(s/60),x=s%60;return String(m).padStart(2,'0')+':'+String(x).padStart(2,'0');}
+function curTarget(){return PROBLEMS[state.prob].target;}
+function paintClock(){
+  clock.textContent=fmt(state.elapsed);
+  clock.classList.toggle('run', state.running && state.elapsed<curTarget());
+  clock.classList.toggle('over', state.elapsed>=curTarget());
+  tgt.textContent='target '+PROBLEMS[state.prob].targetLabel;
+}
+function tick(){state.elapsed++;paintClock();}
+document.getElementById('startBtn').onclick=function(){
+  if(state.running){clearInterval(state.timer);state.running=false;this.textContent='Resume';}
+  else{state.timer=setInterval(tick,1000);state.running=true;this.textContent='Pause';}
+  paintClock();
+};
+document.getElementById('resetBtn').onclick=function(){clearInterval(state.timer);state.running=false;state.elapsed=0;document.getElementById('startBtn').textContent='Start';paintClock();};
+function resetClock(){clearInterval(state.timer);state.running=false;state.elapsed=0;document.getElementById('startBtn').textContent='Start';paintClock();}
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function saveCode(){const ta=document.getElementById('editor');if(ta)state.code[state.prob]=ta.value;}
+
+function renderChips(){
+  const el=document.getElementById('chips');el.innerHTML='';
+  PROBLEMS.forEach((p,i)=>{
+    const c=document.createElement('button');
+    c.className='chip';c.setAttribute('aria-selected',i===state.prob);
+    c.innerHTML=`<span class="dot ${state.status[i]==='pass'?'pass':state.status[i]==='fail'?'fail':state.status[i]==='attempt'?'attempt':''}"></span>${i+1}. ${p.name}`;
+    c.onclick=()=>{saveCode();state.prob=i;resetClock();renderChips();renderPanel();};
+    el.appendChild(c);
+  });
+}
+function renderPanel(){
+  const p=PROBLEMS[state.prob], id=state.prob;
+  document.getElementById('ptitle').textContent=p.title;
+  document.getElementById('pmeta').innerHTML=`<span class="badge">${p.pattern}</span><span class="t">target ${p.targetLabel}</span><span class="t">·</span><span class="t"><code style="font-family:var(--mono)">solution(...)</code></span>`;
+  document.getElementById('pbody').innerHTML=`${p.html}
+    <h3>Your Solution</h3>
+    <div class="edwrap"><div class="edbar"><span>solution.py</span><span>Tab inserts 4 spaces</span></div><textarea id="editor" spellcheck="false"></textarea></div>
+    <div class="runrow"><button class="btn-go" id="runBtn">Run Tests</button><button id="resetCodeBtn">Reset code</button><span class="status" id="runStatus"></span></div>
+    <div class="results" id="results"></div>
+    <div class="console" id="console"><div class="conhead"><span>CONSOLE — stdout / test output</span><button class="clr" id="clrBtn">Clear</button></div>
+      <div class="conbody" id="conbody"><span class="empty">Run tests to see print() output and per-case results here.</span></div></div>
+    <details class="sol" id="solBox"><summary id="solSummary">Reveal reference solution</summary><div class="solbody"><p>${p.note}</p><div class="ex">${escapeHtml(p.sol)}</div></div></details>`;
+  const ta=document.getElementById('editor');ta.value=state.code[id];
+  ta.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const s=ta.selectionStart,en=ta.selectionEnd;ta.value=ta.value.slice(0,s)+'    '+ta.value.slice(en);ta.selectionStart=ta.selectionEnd=s+4;}});
+  document.getElementById('runBtn').onclick=()=>runTests();
+  document.getElementById('resetCodeBtn').onclick=()=>{ta.value=p.sig;state.code[id]=p.sig;};
+  document.getElementById('clrBtn').onclick=()=>{document.getElementById('conbody').innerHTML='<span class="empty">Console cleared.</span>';};
+  const solBox=document.getElementById('solBox');
+  solBox.querySelector('summary').addEventListener('click',ev=>{
+    if(!solBox.open && !solBox.dataset.ok){ev.preventDefault();
+      if(confirm("Reveal the reference solution? Try your own first.")){solBox.dataset.ok="1";solBox.open=true;solBox.querySelector('summary').textContent="Reference solution";}}
+  });
+}
+
+let pyodide=null, pyState='loading';
+(function loadPy(){
+  const s=document.createElement('script');s.src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js";
+  s.onload=async()=>{try{pyodide=await loadPyodide({indexURL:"https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"});pyState='ready';pyhint.textContent="Python runtime ready — write your solution and Run Tests.";}
+    catch(e){pyState='fail';pyhint.textContent="Python runtime failed to load. Tasks and solutions still work — run code in your own IDE.";}};
+  s.onerror=()=>{pyState='fail';pyhint.textContent="Couldn't reach the Python runtime (network blocked). Tasks and solutions still work — run code locally.";};
+  document.head.appendChild(s);
+})();
+
+async function runTests(){
+  const status=document.getElementById('runStatus'),results=document.getElementById('results'),conbody=document.getElementById('conbody');
+  saveCode();
+  if(pyState==='loading'){status.textContent="runtime still loading…";return;}
+  if(pyState==='fail'){status.textContent="runtime unavailable — run locally";return;}
+  status.textContent="running…";results.innerHTML='';conbody.innerHTML='<span class="sys">running…</span>';
+  const p=PROBLEMS[state.prob],id=state.prob,code=state.code[id];
+  const casesJson=JSON.stringify(p.cases.map(c=>({args:c.args,expected:c.expected})));
+  const harness=[code,"import json as _json","_cases=_json.loads(_CASES_JSON)","_out=[]",
+    "for _i,_c in enumerate(_cases):","    print('\\x01C'+str(_i))","    try:","        _r=solution(*_c['args'])",
+    "        _out.append({'ok':_r==_c['expected'],'got':repr(_r),'exp':repr(_c['expected'])})",
+    "    except Exception as _e:","        _out.append({'ok':False,'got':'ERROR: '+str(_e),'exp':repr(_c['expected'])})","_json.dumps(_out)"].join("\n");
+  const buf=[];
+  try{
+    pyodide.setStdout({batched:s=>buf.push({k:'out',s})});
+    pyodide.setStderr({batched:s=>buf.push({k:'err',s})});
+    pyodide.globals.set("_CASES_JSON",casesJson);
+    const raw=await pyodide.runPythonAsync(harness);
+    const out=JSON.parse(raw);let passed=0;
+    out.forEach((o,i)=>{
+      if(o.ok)passed++;
+      const c=p.cases[i];const label=c.hidden?`Hidden #${i+1}`:`Test #${i+1}`;
+      const argStr=c.hidden?'(hidden input)':escapeHtml(c.args.map(a=>JSON.stringify(a)).join(', '));
+      const div=document.createElement('div');div.className='case '+(o.ok?'ok':'no');
+      div.innerHTML=`<span class="tag ${o.ok?'ok':'no'}">${o.ok?'PASS':'FAIL'}</span><span class="detail"><b>${label}</b> &nbsp; in: ${argStr}<br>expected: <b>${escapeHtml(o.exp)}</b> &nbsp; got: <b>${escapeHtml(o.got)}</b></span>`;
+      results.appendChild(div);
+    });
+    const all=passed===out.length;
+    const sum=document.createElement('div');sum.className='summary';sum.style.color=all?'var(--pass)':'var(--warn)';
+    sum.textContent=`${passed} / ${out.length} passed`+(all?`  ·  ${fmt(state.elapsed)} on the clock`:'');
+    results.prepend(sum);state.status[id]=all?'pass':'fail';status.textContent="";
+    let html='',sawOutput=false;
+    buf.forEach(e=>{
+      if(e.k==='out'&&e.s.charCodeAt(0)===1&&e.s[1]==='C'){const ci=parseInt(e.s.slice(2)),c=p.cases[ci];
+        const lbl=c.hidden?`Hidden #${ci+1}`:`Test #${ci+1}`;const a=c.hidden?'':'  in: '+escapeHtml(c.args.map(x=>JSON.stringify(x)).join(', '));
+        html+=`<span class="sys">— ${lbl}${a}\n</span>`;}
+      else{sawOutput=true;html+=`<span class="${e.k==='err'?'err':'out'}">${escapeHtml(e.s)}\n</span>`;}
+    });
+    if(!sawOutput)html+='<span class="sys">(no print output)\n</span>';
+    html+='\n';
+    out.forEach((o,i)=>{html+=`<span class="${o.ok?'res-ok':'res-no'}">${o.ok?'PASS':'FAIL'}  Test ${i+1}  →  expected ${escapeHtml(o.exp)}, got ${escapeHtml(o.got)}\n</span>`;});
+    html+=`<span class="${all?'res-ok':'res-no'}">\n>>> ${passed} / ${out.length} passed\n</span>`;
+    conbody.innerHTML=html;conbody.scrollTop=0;renderChips();
+  }catch(e){
+    status.textContent="";
+    const div=document.createElement('div');div.className='case no';
+    div.innerHTML=`<span class="tag no">ERROR</span><span class="detail">${escapeHtml(String(e).split('\n').slice(-6).join('\n'))}</span>`;
+    results.appendChild(div);
+    let html='';buf.forEach(e2=>{if(!(e2.k==='out'&&e2.s.charCodeAt(0)===1))html+=`<span class="${e2.k==='err'?'err':'out'}">${escapeHtml(e2.s)}\n</span>`;});
+    html+=`<span class="err">\nTraceback:\n${escapeHtml(String(e).split('\n').slice(-8).join('\n'))}\n</span>`;
+    document.getElementById('conbody').innerHTML=html;
+    state.status[id]='attempt';renderChips();
+  }
+}
+renderChips();renderPanel();paintClock();
+</script>

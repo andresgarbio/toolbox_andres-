@@ -1,0 +1,85 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Python Drills</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0f1620; --panel:#161f2b; --panel2:#1d2937; --line:#2a3a4d;
+    --text:#c9d6e3; --muted:#7a8da0;
+    --signal:#f5a623; --warn:#ff5d5d; --pass:#34d6b4; --accent:#7aa2ff;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--text);font-family:var(--disp);-webkit-font-smoothing:antialiased;line-height:1.5}
+  .wrap{max-width:920px;margin:0 auto;padding:22px 18px 64px}
+  .nav{display:flex;gap:14px;align-items:center;font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:22px;flex-wrap:wrap}
+  .nav a{color:var(--accent);text-decoration:none}
+  .nav a:hover{text-decoration:underline}
+  .head{border:1px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel));border-radius:14px;padding:18px 22px;margin-bottom:18px}
+  .head h1{margin:0 0 4px;font-size:22px;font-weight:700;letter-spacing:-.01em}
+  .head p{margin:0;color:var(--muted);font-size:13px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  a.card{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);background:var(--panel);border-radius:14px;
+    padding:18px 20px;text-decoration:none;color:var(--text);transition:transform .08s,border-color .15s,background .15s}
+  a.card:hover{border-color:var(--signal);background:var(--panel2);transform:translateY(-2px)}
+  .card .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--signal)}
+  .card .t{font-size:17px;font-weight:600}
+  .card .d{font-size:13px;color:var(--muted)}
+  .card .meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
+  .foot{margin-top:22px;font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.7}
+  .foot b{color:var(--text);font-weight:500}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+</style>
+
+<div class="wrap">
+  <div class="nav">
+    <a href="../../">← Toolbox</a>
+    <a href="../">← Python Dojo</a>
+    <span>· drills</span>
+  </div>
+
+  <div class="head">
+    <h1>Python Drills</h1>
+    <p>Timed practice with a built-in Python runtime. Write in the editor, run against test cases, check the console. Everything runs in your browser — no install, works offline once loaded.</p>
+  </div>
+
+  <div class="grid">
+    <a class="card" href="./mock.html">
+      <span class="k">Full Mock</span>
+      <span class="t">CodeSignal GCA Mock</span>
+      <span class="d">Four tasks, 70-minute clock, exam conditions. The dress rehearsal that tests pacing, not just solving.</span>
+      <span class="meta">4 tasks · countdown timer</span>
+    </a>
+
+    <a class="card" href="./gym.html">
+      <span class="k">Tiered Reps</span>
+      <span class="t">Training Gym</span>
+      <span class="d">Four tiers: speed, sub-10, simulation, and algorithmic with pattern-hint buttons. Per-tier targets, stopwatch.</span>
+      <span class="meta">15 problems · hints on Tier 4</span>
+    </a>
+
+    <a class="card" href="./dictionary.html">
+      <span class="k">Pattern Focus</span>
+      <span class="t">Dictionary Drills</span>
+      <span class="d">Seven escalating reps of the remember-don't-search muscle: seen-set, complement lookup, tuple keys, prefix-sum dict, window + dict.</span>
+      <span class="meta">7 problems · pattern-labeled</span>
+    </a>
+
+    <a class="card" href="./matrix.html">
+      <span class="k">Pattern Focus</span>
+      <span class="t">Matrix &amp; Simulation Drills</span>
+      <span class="d">Five grid problems: Game of Life, rotate, set-zeroes, flood fill, count islands. Each built around a specific gotcha.</span>
+      <span class="meta">5 problems · grid + BFS</span>
+    </a>
+  </div>
+
+  <div class="foot">
+    <b>How each app works:</b> hit Start to run the clock, write your <span style="color:var(--accent)">solution(...)</span> in the editor, then Run Tests.<br>
+    Your <span style="color:var(--accent)">print()</span> output and per-case pass/fail land in the console. Reference solutions are one click away, behind a confirm.<br>
+    The Python runtime (Pyodide) downloads once on first open, then caches — give it a couple seconds the first time.
+  </div>
+</div>

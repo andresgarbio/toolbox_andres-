@@ -1,0 +1,535 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0f1620; --panel:#161f2b; --panel2:#1d2937; --line:#2a3a4d;
+    --text:#c9d6e3; --muted:#7a8da0;
+    --signal:#f5a623; --warn:#ff5d5d; --pass:#34d6b4; --accent:#7aa2ff;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--text);font-family:var(--disp);
+    -webkit-font-smoothing:antialiased;line-height:1.5}
+  .wrap{max-width:980px;margin:0 auto;padding:20px 18px 64px}
+
+  /* header / instrument bar */
+  .bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    border:1px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel));
+    border-radius:14px;padding:14px 18px;margin-bottom:14px}
+  .brand{display:flex;flex-direction:column;gap:2px;margin-right:auto}
+  .brand b{font-weight:700;letter-spacing:.04em;font-size:15px}
+  .brand span{font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase}
+  .clock{font-family:var(--mono);font-weight:600;font-size:34px;line-height:1;
+    letter-spacing:.04em;color:var(--signal);min-width:148px;text-align:center;
+    text-shadow:0 0 22px rgba(245,166,35,.25);transition:color .3s}
+  .clock.low{color:var(--warn);text-shadow:0 0 22px rgba(255,93,93,.3)}
+  .clock.done{color:var(--warn);animation:flash 1s steps(2,end) infinite}
+  @keyframes flash{50%{opacity:.35}}
+  .controls{display:flex;gap:8px}
+  button{font-family:var(--disp);cursor:pointer;border-radius:9px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--text);padding:8px 14px;font-size:13px;font-weight:500;
+    transition:transform .06s,border-color .15s,background .15s}
+  button:hover{border-color:#3c5168}
+  button:active{transform:translateY(1px)}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .btn-go{background:var(--signal);color:#1a1205;border-color:transparent;font-weight:600}
+  .btn-go:hover{background:#ffb73a}
+
+  /* task selector — test bench of lamps */
+  .bench{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+  .lamp{border:1px solid var(--line);background:var(--panel);border-radius:11px;
+    padding:12px 12px;text-align:left;display:flex;flex-direction:column;gap:6px}
+  .lamp[aria-selected="true"]{border-color:var(--signal);background:var(--panel2)}
+  .lamp .top{display:flex;align-items:center;gap:8px}
+  .dot{width:9px;height:9px;border-radius:50%;background:#33485d;flex:none;
+    box-shadow:0 0 0 0 transparent;transition:.2s}
+  .dot.attempt{background:var(--signal);box-shadow:0 0 10px rgba(245,166,35,.6)}
+  .dot.pass{background:var(--pass);box-shadow:0 0 10px rgba(52,214,180,.6)}
+  .dot.fail{background:var(--warn);box-shadow:0 0 10px rgba(255,93,93,.6)}
+  .lamp .tnum{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em}
+  .lamp .tname{font-size:13px;font-weight:500}
+  .lamp .est{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+
+  /* problem panel */
+  .panel{border:1px solid var(--line);background:var(--panel);border-radius:14px;overflow:hidden}
+  .phead{padding:18px 22px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .phead h2{margin:0 0 8px;font-size:19px;font-weight:600;letter-spacing:-.01em}
+  .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .badge{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.08em;
+    text-transform:uppercase;padding:3px 9px;border-radius:6px;border:1px solid}
+  .b-easy{color:var(--pass);border-color:rgba(52,214,180,.4);background:rgba(52,214,180,.08)}
+  .b-med{color:var(--signal);border-color:rgba(245,166,35,.4);background:rgba(245,166,35,.08)}
+  .b-hard{color:var(--warn);border-color:rgba(255,93,93,.4);background:rgba(255,93,93,.08)}
+  .meta .t{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+  .pbody{padding:20px 22px}
+  .pbody p{margin:0 0 12px}
+  .pbody h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+    margin:20px 0 8px;font-weight:600}
+  .pbody code{font-family:var(--mono);font-size:12.5px;background:var(--panel2);
+    padding:1.5px 6px;border-radius:5px;border:1px solid var(--line)}
+  .pbody ul{margin:0 0 12px;padding-left:18px}
+  .pbody li{margin:4px 0}
+  .ex{font-family:var(--mono);font-size:12.5px;background:#0c121b;border:1px solid var(--line);
+    border-radius:9px;padding:12px 14px;margin:8px 0;white-space:pre-wrap;color:#aebccd}
+  .ex b{color:var(--accent);font-weight:500}
+
+  /* editor */
+  .edwrap{margin-top:8px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#0b1019}
+  .edbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;
+    border-bottom:1px solid var(--line);background:var(--panel2)}
+  .edbar span{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  textarea{width:100%;min-height:260px;resize:vertical;border:0;outline:0;background:#0b1019;
+    color:#dbe7f3;font-family:var(--mono);font-size:13px;line-height:1.65;padding:14px 16px;
+    tab-size:4;white-space:pre;overflow-wrap:normal;overflow-x:auto}
+  .runrow{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
+  .status{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:auto}
+
+  /* results */
+  .results{margin-top:14px;display:flex;flex-direction:column;gap:7px}
+  .case{border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-family:var(--mono);
+    font-size:12px;display:flex;gap:12px;align-items:flex-start;background:var(--panel)}
+  .case.ok{border-color:rgba(52,214,180,.35)}
+  .case.no{border-color:rgba(255,93,93,.35)}
+  .tag{font-weight:600;flex:none}
+  .tag.ok{color:var(--pass)} .tag.no{color:var(--warn)}
+  .case .detail{color:var(--muted);overflow-x:auto}
+  .case .detail b{color:var(--text);font-weight:500}
+  .summary{font-family:var(--mono);font-size:12.5px;padding:6px 0;font-weight:600}
+
+  /* console */
+  .console{margin-top:14px;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#0a0e15}
+  .conhead{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;
+    border-bottom:1px solid var(--line);background:var(--panel2)}
+  .conhead span{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+  .conhead .clr{font-size:11px;padding:3px 9px}
+  .conbody{font-family:var(--mono);font-size:12px;line-height:1.6;padding:12px 14px;
+    white-space:pre-wrap;word-break:break-word;max-height:300px;overflow:auto;color:#aebccd;min-height:38px}
+  .conbody .out{color:#cdd9e6}
+  .conbody .err{color:var(--warn)}
+  .conbody .sys{color:var(--muted)}
+  .conbody .res-ok{color:var(--pass)}
+  .conbody .res-no{color:var(--warn)}
+  .conbody .empty{color:var(--muted);font-style:italic}
+
+  /* solution */
+  details.sol{margin-top:16px;border:1px solid var(--line);border-radius:11px;background:var(--panel2)}
+  details.sol summary{cursor:pointer;padding:12px 16px;font-size:13px;font-weight:500;
+    list-style:none;display:flex;align-items:center;gap:8px;color:var(--muted)}
+  details.sol summary::-webkit-details-marker{display:none}
+  details.sol summary:hover{color:var(--text)}
+  details.sol[open] summary{border-bottom:1px solid var(--line);color:var(--text)}
+  .solbody{padding:16px}
+  .solbody .ex{margin-top:0}
+  .solbody p{font-size:13px;color:var(--text);margin:0 0 10px}
+  .pyhint{font-family:var(--mono);font-size:11px;color:var(--muted);padding:0 22px 18px}
+  @media(max-width:680px){
+    .bench{grid-template-columns:repeat(2,1fr)}
+    .clock{font-size:28px;min-width:120px}
+    .brand{order:-1}
+  }
+</style>
+
+<div class="wrap">
+  <div class="bar">
+    <div class="brand">
+      <b>GCA MOCK — PYTHON</b>
+      <span>4 tasks · 70 min · increasing difficulty</span>
+    </div>
+    <div class="clock" id="clock">70:00</div>
+    <div class="controls">
+      <button class="btn-go" id="startBtn">Start</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <div class="bench" id="bench"></div>
+
+  <div class="panel">
+    <div class="phead">
+      <h2 id="ptitle"></h2>
+      <div class="meta" id="pmeta"></div>
+    </div>
+    <div class="pbody" id="pbody"></div>
+    <div class="pyhint" id="pyhint">Initializing Python runtime…</div>
+  </div>
+</div>
+
+<script>
+const TASKS = [
+  {
+    name:"Above the Mean", diff:"easy", est:"~3 min",
+    title:"Task 1 — Above the Mean",
+    html:`<p>You are given an integer array <code>a</code>. Return the number of elements that are <b>strictly greater</b> than the average (arithmetic mean) of all elements in <code>a</code>.</p>
+      <p>The mean is computed as a real number (no rounding).</p>
+      <h3>Example</h3>
+      <div class="ex"><b>Input:</b>  a = [1, 2, 3, 4, 5]
+<b>Output:</b> 2
+<b>Why:</b>    mean = 3.0 → only 4 and 5 exceed it.</div>
+      <h3>Constraints</h3>
+      <ul><li>1 ≤ len(a) ≤ 10^5</li><li>-10^6 ≤ a[i] ≤ 10^6</li></ul>`,
+    sig:"def solution(a):\n    # your code here\n    ",
+    cases:[
+      {args:[[1,2,3,4,5]], expected:2},
+      {args:[[5,5,5]], expected:0},
+      {args:[[10,1,1,1]], expected:1},
+      {args:[[1]], expected:0, hidden:true},
+      {args:[[-3,-2,-1,0,100]], expected:1, hidden:true},
+      {args:[[7,7,7,8]], expected:1, hidden:true},
+    ],
+    sol:`def solution(a):
+    avg = sum(a) / len(a)
+    return sum(1 for x in a if x > avg)`,
+    note:`One pass to get the sum, one to count. O(n) time, O(1) space. The only trap is integer division — use <code>/</code>, not <code>//</code>, so the mean stays exact.`
+  },
+  {
+    name:"Divisible Pairs", diff:"med", est:"~8 min",
+    title:"Task 2 — Divisible Pairs",
+    html:`<p>Given an integer array <code>a</code> and a positive integer <code>k</code>, count the number of index pairs <code>(i, j)</code> with <code>i &lt; j</code> such that <code>a[i] + a[j]</code> is divisible by <code>k</code>.</p>
+      <p>The array can be large, so an O(n²) scan will time out — bucket the values by remainder instead.</p>
+      <h3>Example</h3>
+      <div class="ex"><b>Input:</b>  a = [1, 2, 3, 4, 5], k = 3
+<b>Output:</b> 4
+<b>Why:</b>    (1,2), (1,5), (2,4), (4,5) each sum to a multiple of 3.</div>
+      <h3>Constraints</h3>
+      <ul><li>1 ≤ len(a) ≤ 10^5</li><li>1 ≤ k ≤ 10^5</li><li>0 ≤ a[i] ≤ 10^9</li></ul>`,
+    sig:"def solution(a, k):\n    # your code here\n    ",
+    cases:[
+      {args:[[1,2,3,4,5],3], expected:4},
+      {args:[[2,2,2,2],2], expected:6},
+      {args:[[5],3], expected:0},
+      {args:[[1,3,2,6,1,2],3], expected:5, hidden:true},
+      {args:[[10,20,30,40],10], expected:6, hidden:true},
+      {args:[[0,0,0],1], expected:3, hidden:true},
+    ],
+    sol:`def solution(a, k):
+    from collections import Counter
+    rem = Counter(x % k for x in a)
+    total = 0
+    for r in range(k):
+        comp = (k - r) % k
+        if r == comp:                  # remainder pairs with itself
+            total += rem[r] * (rem[r] - 1) // 2
+        elif r < comp:                 # count each unordered pair once
+            total += rem[r] * rem[comp]
+    return total`,
+    note:`Two values pair iff their remainders sum to k (or both are 0). Count remainders once, then combine buckets. The self-pairing buckets (r == 0, and r == k/2 for even k) use n·(n−1)/2; cross buckets multiply. O(n + k) time. Guarding with <code>r &lt; comp</code> avoids double-counting.`
+  },
+  {
+    name:"Rover Telemetry", diff:"hard", est:"~20 min",
+    title:"Task 3 — Rover Telemetry",
+    html:`<p>A rover starts at the origin <code>(0, 0)</code> on an infinite grid, <b>facing North</b>. It executes a command string made of three characters:</p>
+      <ul>
+        <li><code>'G'</code> — move forward one cell in the direction it currently faces.</li>
+        <li><code>'L'</code> — rotate 90° counter-clockwise (turn left), do not move.</li>
+        <li><code>'R'</code> — rotate 90° clockwise (turn right), do not move.</li>
+      </ul>
+      <p>Some cells contain obstacles, given as a list of <code>[x, y]</code> coordinates. If a <code>'G'</code> would move the rover <b>onto an obstacle</b>, the rover stays in place for that command (it does not turn, it simply does not move) and continues with the next command.</p>
+      <p>North is <code>+y</code>, East is <code>+x</code>. Return the <b>maximum squared Euclidean distance</b> from the origin (<code>x² + y²</code>) the rover occupies at any point during execution, including the start.</p>
+      <h3>Example</h3>
+      <div class="ex"><b>Input:</b>  commands = "GGRGG", obstacles = []
+<b>Output:</b> 8
+<b>Trace:</b>  (0,0)→(0,1)→(0,2) then face East →(1,2)→(2,2)
+         max of x²+y² over the path is 2²+2² = 8.</div>
+      <h3>Constraints</h3>
+      <ul><li>0 ≤ len(commands) ≤ 10^4, commands ∈ {G, L, R}</li><li>0 ≤ len(obstacles) ≤ 10^4</li><li>-10^4 ≤ obstacle coords ≤ 10^4</li></ul>`,
+    sig:'def solution(commands, obstacles):\n    # your code here\n    ',
+    cases:[
+      {args:["GGRGG",[]], expected:8},
+      {args:["GG",[[0,1]]], expected:0},
+      {args:["LG",[]], expected:1},
+      {args:["",[]], expected:0, hidden:true},
+      {args:["GGGG",[[0,3]]], expected:4, hidden:true},
+      {args:["GLGLGLGL",[]], expected:2, hidden:true},
+      {args:["RRGG",[]], expected:4, hidden:true},
+    ],
+    sol:`def solution(commands, obstacles):
+    obs = set(map(tuple, obstacles))
+    # index 0=N,1=E,2=S,3=W  (clockwise order)
+    dirs = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    d = 0
+    x = y = 0
+    best = 0
+    for c in commands:
+        if c == 'L':
+            d = (d - 1) % 4
+        elif c == 'R':
+            d = (d + 1) % 4
+        else:  # 'G'
+            nx, ny = x + dirs[d][0], y + dirs[d][1]
+            if (nx, ny) not in obs:
+                x, y = nx, ny
+                best = max(best, x * x + y * y)
+    return best`,
+    note:`Classic careful-simulation task: the points are all in the reading. Order the direction vectors clockwise so 'R' is +1 and 'L' is −1 mod 4. Put obstacles in a set for O(1) lookups. Track the running max — don't just return the final position, since the rover can move away and back. O(len(commands)) time.`
+  },
+  {
+    name:"Ridge Crossing", diff:"hard", est:"~40 min",
+    title:"Task 4 — Ridge Crossing",
+    html:`<p>You are given a 2D grid <code>heights</code> of size <code>rows × cols</code> where <code>heights[r][c]</code> is the elevation of a cell. A hiker starts at the top-left cell <code>(0, 0)</code> and wants to reach the bottom-right cell <code>(rows−1, cols−1)</code>, moving up, down, left, or right between adjacent cells.</p>
+      <p>The <b>effort</b> of a route is the <b>maximum absolute elevation difference</b> between any two consecutive cells along that route. Return the minimum possible effort needed to travel from start to destination.</p>
+      <h3>Example</h3>
+      <div class="ex"><b>Input:</b>  heights = [[1,2,2],
+                    [3,8,2],
+                    [5,3,5]]
+<b>Output:</b> 2
+<b>Why:</b>    route 1→2→2→2→5 has consecutive diffs ≤ 2.
+         A path through 8 would force an effort of 5+.</div>
+      <h3>Constraints</h3>
+      <ul><li>1 ≤ rows, cols ≤ 100</li><li>1 ≤ heights[r][c] ≤ 10^6</li></ul>
+      <p style="color:var(--muted);font-size:12.5px">Hint: this is a shortest-path problem where the path cost is a <i>max</i> rather than a <i>sum</i> — a heap-based Dijkstra variant fits cleanly.</p>`,
+    sig:'def solution(heights):\n    # your code here\n    ',
+    cases:[
+      {args:[[[1,2,2],[3,8,2],[5,3,5]]], expected:2},
+      {args:[[[1,2,3],[3,8,4],[5,3,5]]], expected:1},
+      {args:[[[5]]], expected:0},
+      {args:[[[1,2,1,1,1],[1,2,1,2,1],[1,2,1,2,1],[1,2,1,2,1],[1,1,1,2,1]]], expected:0, hidden:true},
+      {args:[[[1,10,6,7,9,10,4,9]]], expected:9, hidden:true},
+      {args:[[[3],[2],[8],[4]]], expected:6, hidden:true},
+    ],
+    sol:`def solution(heights):
+    import heapq
+    rows, cols = len(heights), len(heights[0])
+    effort = [[float('inf')] * cols for _ in range(rows)]
+    effort[0][0] = 0
+    pq = [(0, 0, 0)]  # (effort_so_far, r, c)
+    while pq:
+        e, r, c = heapq.heappop(pq)
+        if r == rows - 1 and c == cols - 1:
+            return e
+        if e > effort[r][c]:
+            continue                       # stale entry
+        for dr, dc in ((1,0),(-1,0),(0,1),(0,-1)):
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < rows and 0 <= nc < cols:
+                ne = max(e, abs(heights[nr][nc] - heights[r][c]))
+                if ne < effort[nr][nc]:
+                    effort[nr][nc] = ne
+                    heapq.heappush(pq, (ne, nr, nc))
+    return 0`,
+    note:`Dijkstra where the "distance" to a cell is the smallest possible max-edge along any path to it. Relaxation uses <code>max(e, |Δheight|)</code> instead of a sum — that single change is the whole trick. Pop the smallest effort first and you can return the moment you reach the goal. The staleness check <code>e &gt; effort[r][c]</code> skips outdated heap entries. O(rows·cols·log(rows·cols)). Binary-search + BFS/DSU also works if you'd rather practice that.`
+  },
+];
+
+const state = { sel:0, started:false, remaining:70*60, timer:null, code:{}, status:{} };
+TASKS.forEach((t,i)=>{ state.code[i]=t.sig; state.status[i]="none"; });
+
+const clock=document.getElementById('clock');
+const bench=document.getElementById('bench');
+const pyhint=document.getElementById('pyhint');
+
+function fmt(s){const m=Math.floor(s/60),x=s%60;return String(m).padStart(2,'0')+':'+String(x).padStart(2,'0');}
+function tick(){
+  state.remaining--;
+  clock.textContent=fmt(Math.max(0,state.remaining));
+  clock.classList.toggle('low', state.remaining<=600 && state.remaining>0);
+  if(state.remaining<=0){clearInterval(state.timer);state.timer=null;state.started=false;
+    clock.textContent="00:00";clock.classList.remove('low');clock.classList.add('done');
+    document.getElementById('startBtn').textContent="Start";}
+}
+document.getElementById('startBtn').onclick=function(){
+  if(state.started){clearInterval(state.timer);state.timer=null;state.started=false;this.textContent="Resume";}
+  else{if(state.remaining<=0){state.remaining=70*60;clock.classList.remove('done');}
+    state.timer=setInterval(tick,1000);state.started=true;this.textContent="Pause";}
+};
+document.getElementById('resetBtn').onclick=function(){
+  clearInterval(state.timer);state.timer=null;state.started=false;state.remaining=70*60;
+  clock.textContent="70:00";clock.classList.remove('low','done');
+  document.getElementById('startBtn').textContent="Start";
+};
+
+function renderBench(){
+  bench.innerHTML='';
+  TASKS.forEach((t,i)=>{
+    const b=document.createElement('button');
+    b.className='lamp';b.setAttribute('aria-selected', i===state.sel);
+    b.innerHTML=`<div class="top"><span class="dot ${state.status[i]==='pass'?'pass':state.status[i]==='fail'?'fail':state.status[i]==='attempt'?'attempt':''}"></span>
+      <span class="tnum">TASK ${i+1}</span></div>
+      <span class="tname">${t.name}</span><span class="est">${t.est}</span>`;
+    b.onclick=()=>{ saveCode(); state.sel=i; renderBench(); renderPanel(); };
+    bench.appendChild(b);
+  });
+}
+
+const badgeClass={easy:'b-easy',med:'b-med',hard:'b-hard'};
+const badgeText={easy:'Easy',med:'Medium',hard:'Hard'};
+
+function saveCode(){
+  const ta=document.getElementById('editor');
+  if(ta) state.code[state.sel]=ta.value;
+}
+
+function renderPanel(){
+  const t=TASKS[state.sel];
+  document.getElementById('ptitle').textContent=t.title;
+  document.getElementById('pmeta').innerHTML=
+    `<span class="badge ${badgeClass[t.diff]}">${badgeText[t.diff]}</span>
+     <span class="t">Suggested: ${t.est}</span>
+     <span class="t">·</span><span class="t">function: <code style="font-family:var(--mono)">solution(...)</code></span>`;
+
+  const body=document.getElementById('pbody');
+  body.innerHTML = t.html + `
+    <h3>Your Solution</h3>
+    <div class="edwrap">
+      <div class="edbar"><span>solution.py</span><span>Tab inserts 4 spaces</span></div>
+      <textarea id="editor" spellcheck="false"></textarea>
+    </div>
+    <div class="runrow">
+      <button class="btn-go" id="runBtn">Run Tests</button>
+      <button id="resetCodeBtn">Reset code</button>
+      <span class="status" id="runStatus"></span>
+    </div>
+    <div class="results" id="results"></div>
+    <div class="console" id="console">
+      <div class="conhead"><span>CONSOLE — stdout / test output</span>
+        <button class="clr" id="clrBtn">Clear</button></div>
+      <div class="conbody" id="conbody"><span class="empty">Run tests to see print() output and per-case results here.</span></div>
+    </div>
+    <details class="sol" id="solBox">
+      <summary id="solSummary">Reveal reference solution</summary>
+      <div class="solbody">
+        <p>${t.note}</p>
+        <div class="ex">${escapeHtml(t.sol)}</div>
+      </div>
+    </details>`;
+
+  const ta=document.getElementById('editor');
+  ta.value=state.code[state.sel];
+  ta.addEventListener('keydown',e=>{
+    if(e.key==='Tab'){e.preventDefault();
+      const s=ta.selectionStart,en=ta.selectionEnd;
+      ta.value=ta.value.slice(0,s)+'    '+ta.value.slice(en);
+      ta.selectionStart=ta.selectionEnd=s+4;}
+  });
+  document.getElementById('runBtn').onclick=()=>runTests();
+  document.getElementById('resetCodeBtn').onclick=()=>{ta.value=t.sig;state.code[state.sel]=t.sig;};
+  document.getElementById('clrBtn').onclick=()=>{
+    document.getElementById('conbody').innerHTML='<span class="empty">Console cleared.</span>';};
+  const solBox=document.getElementById('solBox');
+  solBox.querySelector('summary').addEventListener('click',ev=>{
+    if(!solBox.open && !solBox.dataset.ok){
+      ev.preventDefault();
+      if(confirm("Reveal the reference solution for this task? Try running your own first.")){
+        solBox.dataset.ok="1";solBox.open=true;
+        solBox.querySelector('summary').textContent="Reference solution";
+      }
+    }
+  });
+}
+
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ---- Pyodide ----
+let pyodide=null, pyState='loading';
+function loadPy(){
+  const s=document.createElement('script');
+  s.src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js";
+  s.onload=async()=>{
+    try{
+      pyodide=await loadPyodide({indexURL:"https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"});
+      pyState='ready';pyhint.textContent="Python runtime ready — write your solution and Run Tests.";
+    }catch(e){pyState='fail';pyhint.textContent="Python runtime failed to load. You can still read tasks and solutions — run your code in your own IDE against the listed cases.";}
+  };
+  s.onerror=()=>{pyState='fail';
+    pyhint.textContent="Couldn't reach the Python runtime (network blocked). Tasks and solutions still work — run your code locally against the listed cases.";};
+  document.head.appendChild(s);
+}
+
+async function runTests(){
+  const status=document.getElementById('runStatus');
+  const results=document.getElementById('results');
+  saveCode();
+  if(pyState==='loading'){status.textContent="runtime still loading…";return;}
+  if(pyState==='fail'){status.textContent="runtime unavailable — run locally";return;}
+  status.textContent="running…";results.innerHTML='';
+  const conbody=document.getElementById('conbody');
+  conbody.innerHTML='<span class="sys">running…</span>';
+  const t=TASKS[state.sel];
+  const code=state.code[state.sel];
+  const casesJson=JSON.stringify(t.cases.map(c=>({args:c.args,expected:c.expected})));
+  const harness=[
+    code,
+    "import json as _json",
+    "_cases=_json.loads(_CASES_JSON)",
+    "_out=[]",
+    "for _i,_c in enumerate(_cases):",
+    "    print('\\x01C'+str(_i))",
+    "    try:",
+    "        _r=solution(*_c['args'])",
+    "        _out.append({'ok':_r==_c['expected'],'got':repr(_r),'exp':repr(_c['expected'])})",
+    "    except Exception as _e:",
+    "        _out.append({'ok':False,'got':'ERROR: '+str(_e),'exp':repr(_c['expected'])})",
+    "_json.dumps(_out)"
+  ].join("\n");
+  const buf=[];
+  try{
+    pyodide.setStdout({batched:s=>buf.push({k:'out',s})});
+    pyodide.setStderr({batched:s=>buf.push({k:'err',s})});
+    pyodide.globals.set("_CASES_JSON",casesJson);
+    const raw=await pyodide.runPythonAsync(harness);
+    const out=JSON.parse(raw);
+    let passed=0;
+    out.forEach((o,i)=>{
+      if(o.ok)passed++;
+      const c=t.cases[i];
+      const label=c.hidden?`Hidden #${i+1}`:`Test #${i+1}`;
+      const argStr=c.hidden?'(hidden input)':escapeHtml(c.args.map(a=>JSON.stringify(a)).join(', '));
+      const div=document.createElement('div');
+      div.className='case '+(o.ok?'ok':'no');
+      div.innerHTML=`<span class="tag ${o.ok?'ok':'no'}">${o.ok?'PASS':'FAIL'}</span>
+        <span class="detail"><b>${label}</b> &nbsp; in: ${argStr}<br>
+        expected: <b>${escapeHtml(o.exp)}</b> &nbsp; got: <b>${escapeHtml(o.got)}</b></span>`;
+      results.appendChild(div);
+    });
+    const all=passed===out.length;
+    const sum=document.createElement('div');
+    sum.className='summary';sum.style.color=all?'var(--pass)':'var(--warn)';
+    sum.textContent=`${passed} / ${out.length} passed`;
+    results.prepend(sum);
+    state.status[state.sel]=all?'pass':'fail';
+    status.textContent="";
+
+    // ---- build console ----
+    let html='';
+    let sawOutput=false;
+    buf.forEach(e=>{
+      if(e.k==='out' && e.s.charCodeAt(0)===1 && e.s[1]==='C'){
+        const ci=parseInt(e.s.slice(2));
+        const c=t.cases[ci];
+        const label=c.hidden?`Hidden #${ci+1}`:`Test #${ci+1}`;
+        const a=c.hidden?'':'  in: '+escapeHtml(c.args.map(x=>JSON.stringify(x)).join(', '));
+        html+=`<span class="sys">— ${label}${a}\n</span>`;
+      }else{
+        sawOutput=true;
+        html+=`<span class="${e.k==='err'?'err':'out'}">${escapeHtml(e.s)}\n</span>`;
+      }
+    });
+    if(!sawOutput) html+='<span class="sys">(no print output)\n</span>';
+    html+='\n';
+    out.forEach((o,i)=>{
+      html+=`<span class="${o.ok?'res-ok':'res-no'}">${o.ok?'PASS':'FAIL'}  Test ${i+1}  →  expected ${escapeHtml(o.exp)}, got ${escapeHtml(o.got)}\n</span>`;
+    });
+    html+=`<span class="${all?'res-ok':'res-no'}">\n>>> ${passed} / ${out.length} passed\n</span>`;
+    conbody.innerHTML=html;
+    conbody.scrollTop=0;
+    renderBench();
+  }catch(e){
+    status.textContent="";
+    const div=document.createElement('div');
+    div.className='case no';
+    div.innerHTML=`<span class="tag no">ERROR</span><span class="detail">${escapeHtml(String(e).split('\n').slice(-6).join('\n'))}</span>`;
+    results.appendChild(div);
+    let html='';
+    buf.forEach(e2=>{ if(!(e2.k==='out'&&e2.s.charCodeAt(0)===1))
+      html+=`<span class="${e2.k==='err'?'err':'out'}">${escapeHtml(e2.s)}\n</span>`; });
+    html+=`<span class="err">\nTraceback:\n${escapeHtml(String(e).split('\n').slice(-8).join('\n'))}\n</span>`;
+    document.getElementById('conbody').innerHTML=html;
+    state.status[state.sel]='attempt';renderBench();
+  }
+}
+
+renderBench();renderPanel();loadPy();
+</script>
