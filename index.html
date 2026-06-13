@@ -1,160 +1,85 @@
 <!doctype html>
-<html lang="en">
-<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Toolbox</title>
+<title>Python Drills</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#10141b;
-    --surface:#1a212c;
-    --well:#0c1017;
-    --line:#283140;
-    --line-soft:#1f2733;
-    --text:#e7eef6;
-    --muted:#8d9aac;
-    --faint:#5d6877;
-    --accent:#54d6a4;
-    --accent-dim:#1d3a31;
-    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
-    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --ink:#0f1620; --panel:#161f2b; --panel2:#1d2937; --line:#2a3a4d;
+    --text:#c9d6e3; --muted:#7a8da0;
+    --signal:#f5a623; --warn:#ff5d5d; --pass:#34d6b4; --accent:#7aa2ff;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
   }
   *{box-sizing:border-box}
-  body{
-    margin:0; min-height:100vh; background:var(--ink); color:var(--text);
-    font-family:var(--sans); line-height:1.5; -webkit-font-smoothing:antialiased;
-    display:flex; flex-direction:column;
-  }
-  ::selection{background:var(--accent); color:#06120d}
-
-  .wrap{max-width:1040px; margin:0 auto; padding:64px 22px 40px; width:100%}
-
-  .eyebrow{
-    font-family:var(--mono); font-size:11.5px; letter-spacing:.22em;
-    text-transform:uppercase; color:var(--accent); margin-bottom:18px;
-  }
-  h1{
-    font-size:clamp(40px, 8vw, 76px); line-height:.98; margin:0;
-    font-weight:680; letter-spacing:-.03em;
-  }
-  h1 .dot{color:var(--accent)}
-  .lede{
-    color:var(--muted); font-size:16.5px; max-width:46ch; margin:18px 0 0;
-  }
-
-  .rule{
-    display:flex; align-items:center; gap:14px; margin:44px 0 22px;
-    font-family:var(--mono); font-size:11px; letter-spacing:.16em;
-    text-transform:uppercase; color:var(--faint);
-  }
-  .rule::after{content:""; flex:1; height:1px; background:var(--line)}
-
-  .grid{display:grid; gap:14px; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr))}
-
-  .room{
-    display:flex; flex-direction:column; text-decoration:none; color:inherit;
-    background:var(--surface); border:1px solid var(--line-soft);
-    border-radius:13px; padding:18px 18px 16px; transition:border-color .14s, transform .14s;
-  }
-  a.room:hover{border-color:var(--accent); transform:translateY(-2px)}
-  a.room:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-  .room.soon{opacity:.62; cursor:default}
-
-  .room-top{display:flex; align-items:center; gap:10px; margin-bottom:14px}
-  .lang{font-size:21px; font-weight:640; letter-spacing:-.015em}
-  .status{
-    margin-left:auto; font-family:var(--mono); font-size:10px; letter-spacing:.12em;
-    text-transform:uppercase; padding:3px 8px; border-radius:5px;
-  }
-  .status.ready{color:var(--accent); background:var(--accent-dim)}
-  .status.soon{color:var(--faint); border:1px solid var(--line)}
-
-  .snippet{
-    font-family:var(--mono); font-size:12px; color:#9fb0c2;
-    background:var(--well); border:1px solid var(--line-soft); border-radius:8px;
-    padding:9px 11px; margin:0 0 12px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
-  }
-  .desc{color:var(--muted); font-size:13.5px; margin:0}
-
-  .enter{
-    margin-top:14px; font-family:var(--mono); font-size:12px; letter-spacing:.06em;
-    color:var(--accent);
-  }
-  .room.soon .enter{color:var(--faint)}
-
-  footer{
-    margin-top:auto; padding:26px 22px; text-align:center;
-    font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:var(--faint);
-  }
-  footer a{color:var(--muted); text-decoration:none}
-  footer a:hover{color:var(--text)}
-
-  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  body{margin:0;background:var(--ink);color:var(--text);font-family:var(--disp);-webkit-font-smoothing:antialiased;line-height:1.5}
+  .wrap{max-width:920px;margin:0 auto;padding:22px 18px 64px}
+  .nav{display:flex;gap:14px;align-items:center;font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:22px;flex-wrap:wrap}
+  .nav a{color:var(--accent);text-decoration:none}
+  .nav a:hover{text-decoration:underline}
+  .head{border:1px solid var(--line);background:linear-gradient(180deg,var(--panel2),var(--panel));border-radius:14px;padding:18px 22px;margin-bottom:18px}
+  .head h1{margin:0 0 4px;font-size:22px;font-weight:700;letter-spacing:-.01em}
+  .head p{margin:0;color:var(--muted);font-size:13px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  a.card{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);background:var(--panel);border-radius:14px;
+    padding:18px 20px;text-decoration:none;color:var(--text);transition:transform .08s,border-color .15s,background .15s}
+  a.card:hover{border-color:var(--signal);background:var(--panel2);transform:translateY(-2px)}
+  .card .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--signal)}
+  .card .t{font-size:17px;font-weight:600}
+  .card .d{font-size:13px;color:var(--muted)}
+  .card .meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
+  .foot{margin-top:22px;font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.7}
+  .foot b{color:var(--text);font-weight:500}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
 </style>
-</head>
-<body>
+
 <div class="wrap">
-  <div class="eyebrow">Reference Toolbox</div>
-  <h1>The Dojo<span class="dot">.</span></h1>
-  <p class="lede">Per-language reference rooms built for looking things up fast under a running clock. Search the symptom, copy the snippet, get back to the problem.</p>
+  <div class="nav">
+    <a href="../../">← Toolbox</a>
+    <a href="../">← Python Dojo</a>
+    <span>· drills</span>
+  </div>
 
-  <div class="rule">Rooms</div>
-  <div class="grid" id="grid"></div>
+  <div class="head">
+    <h1>Python Drills</h1>
+    <p>Timed practice with a built-in Python runtime. Write in the editor, run against test cases, check the console. Everything runs in your browser — no install, works offline once loaded.</p>
+  </div>
+
+  <div class="grid">
+    <a class="card" href="./mock.html">
+      <span class="k">Full Mock</span>
+      <span class="t">CodeSignal GCA Mock</span>
+      <span class="d">Four tasks, 70-minute clock, exam conditions. The dress rehearsal that tests pacing, not just solving.</span>
+      <span class="meta">4 tasks · countdown timer</span>
+    </a>
+
+    <a class="card" href="./gym.html">
+      <span class="k">Tiered Reps</span>
+      <span class="t">Training Gym</span>
+      <span class="d">Four tiers: speed, sub-10, simulation, and algorithmic with pattern-hint buttons. Per-tier targets, stopwatch.</span>
+      <span class="meta">15 problems · hints on Tier 4</span>
+    </a>
+
+    <a class="card" href="./dictionary.html">
+      <span class="k">Pattern Focus</span>
+      <span class="t">Dictionary Drills</span>
+      <span class="d">Seven escalating reps of the remember-don't-search muscle: seen-set, complement lookup, tuple keys, prefix-sum dict, window + dict.</span>
+      <span class="meta">7 problems · pattern-labeled</span>
+    </a>
+
+    <a class="card" href="./matrix.html">
+      <span class="k">Pattern Focus</span>
+      <span class="t">Matrix &amp; Simulation Drills</span>
+      <span class="d">Five grid problems: Game of Life, rotate, set-zeroes, flood fill, count islands. Each built around a specific gotcha.</span>
+      <span class="meta">5 problems · grid + BFS</span>
+    </a>
+  </div>
+
+  <div class="foot">
+    <b>How each app works:</b> hit Start to run the clock, write your <span style="color:var(--accent)">solution(...)</span> in the editor, then Run Tests.<br>
+    Your <span style="color:var(--accent)">print()</span> output and per-case pass/fail land in the console. Reference solutions are one click away, behind a confirm.<br>
+    The Python runtime (Pyodide) downloads once on first open, then caches — give it a couple seconds the first time.
+  </div>
 </div>
-
-<footer>
-  built for speed &middot; <a href="https://github.com/andresgarbio/toolbox_andres-">source on github</a>
-</footer>
-
-<script>
-const ROOMS = [
-  {lang:"Python", status:"ready", href:"python/",
-   snip:"from collections import deque, Counter",
-   desc:"Patterns, graphs, structures, and gotchas for timed assessments."},
-  {lang:"C++", status:"soon",
-   snip:"#include <bits/stdc++.h>",
-   desc:"STL idioms, fast IO, and competitive templates."},
-  {lang:"JavaScript", status:"soon",
-   snip:"const seen = new Map();",
-   desc:"Array methods, async patterns, and quick DOM refs."},
-  {lang:"SQL", status:"soon",
-   snip:"SELECT * FROM t WHERE id = ?;",
-   desc:"Joins, window functions, and query patterns."},
-  {lang:"Bash", status:"soon",
-   snip:"while read -r line; do ... done",
-   desc:"Text processing, loops, and one-liners."},
-];
-
-const grid = document.getElementById('grid');
-ROOMS.forEach(r => {
-  const ready = r.status === "ready";
-  const el = document.createElement(ready ? 'a' : 'div');
-  el.className = 'room' + (ready ? '' : ' soon');
-  if(ready) el.href = r.href;
-
-  const code = document.createElement('div');
-  code.className = 'snippet';
-  code.textContent = r.snip;          // textContent so < > render literally
-
-  el.innerHTML =
-    '<div class="room-top">' +
-      '<span class="lang"></span>' +
-      '<span class="status ' + r.status + '">' + (ready ? 'ready' : 'soon') + '</span>' +
-    '</div>';
-  el.querySelector('.lang').textContent = r.lang;
-  el.appendChild(code);
-
-  const d = document.createElement('p');
-  d.className = 'desc'; d.textContent = r.desc;
-  el.appendChild(d);
-
-  const enter = document.createElement('div');
-  enter.className = 'enter';
-  enter.textContent = ready ? 'enter \u2192' : 'in progress';
-  el.appendChild(enter);
-
-  grid.appendChild(el);
-});
-</script>
-</body>
-</html>
